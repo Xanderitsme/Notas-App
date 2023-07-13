@@ -32,6 +32,7 @@ class Cuenta {
 		void mostrarTareas(const int);
 		int getCantTareas(const int);
 		void crearTarea(const int, const string);
+		void actualizarListas();
 };
 
 Cuenta::Cuenta(const string nombre, const string clave) {
@@ -93,20 +94,55 @@ void Cuenta::eliminarLista(const int indice){
 	cantListas--;
 }
 
-string Cuenta::nombreLista(const int indice){
+string Cuenta::nombreLista(const int indice) {
 	return listas[indice].getNombre();
 }
 
-void Cuenta::mostrarTareas(const int indice){
+void Cuenta::mostrarTareas(const int indice) {
 	listas[indice].mostrarTareas();
 }
 
-int Cuenta::getCantTareas(const int indice){
+int Cuenta::getCantTareas(const int indice) {
 	return listas[indice].getCantTareas();
 }
 
 void Cuenta::crearTarea(const int indice, const string contenido){
 	listas[indice].crearTarea(contenido);
+}
+
+void Cuenta::actualizarListas() {
+	vector<string> carpetas;
+	int cantCarpetas = carpetasCont(carpetas), indice;
+
+	for (const string& carpetaNom : carpetas) {
+		if (!convertirString(carpetaNom, indice)) {
+			eliminarCarpeta(carpetaNom);
+		}
+		if (accederCarpeta(carpetaNom)) {
+			if (!existeArchivo("Lista.txt")) {
+				volverCarpetaAnt();
+				eliminarCarpeta(carpetaNom);
+			} else {
+				volverCarpetaAnt();
+			}
+		}
+	}
+
+	vector<string> datos;
+	bool newList;
+	ordenarVector(carpetas);
+	for (const auto& carpeta : carpetas) {
+		newList = false;
+		if (accederCarpeta(carpeta)) {
+			cargarVariables("Lista.txt", datos, 1);
+			listas.push_back(Lista(datos[0]));
+			newList = true;
+			volverCarpetaAnt();
+		}
+		if (newList && carpeta != to_string(listas.size() - 1)) {
+			cambiarNombreCarpeta(carpeta, to_string(listas.size() - 1));
+		}
+	}
 }
 
 #endif

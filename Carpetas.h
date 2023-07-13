@@ -5,7 +5,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <windows.h> ////////////////////////////////este es el problema xd
+#include <windows.h>
 #include <filesystem>
 
 #include <vector>
@@ -16,13 +16,10 @@
 #define mkdir(path, mode) _mkdir(path)
 #define rmdir(path) _rmdir(path)
 
-//#include "Archivos.h"
 using namespace std;
 namespace fs = filesystem;
 
 //FUNCIONES PARA MANIPULAR CARPETAS Y DIRECTORIOS
-
-bool eliminarArchivo(const string& nombreArchivo);
 
 bool crearCarpeta(const string& nombre) {
     if (mkdir(nombre.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0) {
@@ -70,9 +67,7 @@ int archivosCont(vector<string>& archivos) {
     }
     return archivos.size();
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//FUNCION PARA ELIMINAR CUALQUIER CARPETA
 bool eliminarCarpeta(const string& nombre) {
     if (rmdir(nombre.c_str()) == 0) {
         return true;
@@ -81,7 +76,7 @@ bool eliminarCarpeta(const string& nombre) {
         vector<string> archivos;
         int archivosCant = archivosCont(archivos);
         for (const auto& archivoNom : archivos) {
-            eliminarArchivo(archivoNom);
+            remove(archivoNom.c_str());
         }
 
         vector<string> carpetas;

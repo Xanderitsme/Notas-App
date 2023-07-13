@@ -12,15 +12,16 @@
 #include "Cuenta.h"
 using namespace std;
 
-void encabezado(const int);
+void encabezado(const int&);
 void iniciarSesion(vector<Cuenta>&);
 void registrarse(vector<Cuenta>&);
 void verificarNombre(vector<Cuenta>&, bool&, const string, int&);
 void interfazUsuario(Cuenta&);
 void interfazListas(Cuenta&, const int);
-void verificarBD(vector<Cuenta>&);
+bool verificarBD(vector<Cuenta>&);
 void carpetasValidas();
 void eliminarArchivos(const string&);
+
 
 int main() {
 	vector<Cuenta> cuentas; 
@@ -45,12 +46,12 @@ int main() {
 		}
 	}
 
-	cout<<"\n\n\n";
-	system("pause");
+	// cout<<"\n\n\n";
+	// system("pause");
 	return 0;
 }
 
-void encabezado(const int interfaz) {
+void encabezado(const int& interfaz) {
 	system("cls");
 	cout<<"\t\t+---------------------------------------------------+ \n";
 	cout<<"\t\t| - - - ->) Notas app (patente pendiente) (<- - - - | \n";
@@ -166,6 +167,8 @@ void interfazUsuario(Cuenta& usuario){
 	int indice = 0;
 	char tecla = 0;
 	string opcion, nombre;
+	usuario.actualizarListas();
+
 	while(true){
 		encabezado(general);
 		cout<<"\tBienvenido!!! <"<<usuario.getNombre()<<"> es un gusto tenerlo aqui nuevamente \n";
@@ -190,21 +193,29 @@ void interfazUsuario(Cuenta& usuario){
 			encabezado(general);
 			cout<<"\tLa lista <"<<nombre<<"> se ha creado con exito \n\n\n";
 			system("pause");
-		} else if (opcion == "S" || opcion == "s") {
+		} else if (opcion == "S" || opcion == "s" && usuario.getCantListas() > 0) {
 			encabezado(general);
-			cout<<"\tIngrese el numero de la lista\n\n\n";
-			cout<<"\t-> ";
-			cin>>indice;
-			indice--;
-			usuario.eliminarLista(indice);
-			cin.ignore();
+			cout << "\tIngrese el numero de la lista que desee eliminar\n\n";
+			usuario.mostrarListas();
+			cout << "\t-> ";
+			getline(cin, opcion);
+			if (convertirString(opcion, indice) && indice >= 0 && indice < usuario.getCantListas()) {
+				usuario.eliminarLista(indice);
+				encabezado(general);
+				cout << "\tLa lista se ha eliminado con exito\n\n\n";
+				system("pause");
+			} else {
+				encabezado(general);
+				cout << "\tEl numero de lista u opcion seleccionada no es valida\n\n\n";
+				system("pause");
+			}
 		} else if (opcion == "D" || opcion == "d") {
 
 		} else if (opcion == "X" || opcion == "x") {
 			volverCarpetaAnt();
 			break;
 		} else {
-			if(convertirString(opcion, indice) && indice >= 0 && indice < usuario.getCantListas()){
+			if (convertirString(opcion, indice) && indice >= 0 && indice < usuario.getCantListas()) {
 				interfazListas(usuario, indice);
 			} else {
 				cout<<"\tEl numero de lista u opcion seleccionada no es valida \n\n\n";
@@ -244,6 +255,7 @@ void interfazListas(Cuenta& usuario, const int indice){
 	}
 }
 
+/* 
 void verificarBD(vector<Cuenta>& cuentas) {
 	const string nombre = "Data", cuenta = "Cuenta.txt";
 	string carpetaNom;
@@ -296,7 +308,80 @@ void verificarBD(vector<Cuenta>& cuentas) {
 		crearCarpeta(nombre);
 		accederCarpeta(nombre);
 	}
+}*/
+// ActualizarBD()
+// ActualizarUsuario()
+// ActualizarLista()
+bool verificarBD(vector<Cuenta>& cuentas) {
+	const string nombre = "Data", cuenta = "Cuenta.txt";
+	string carpetaNom;
+	bool newUser;
+	if (!accederCarpeta(nombre)) {
+		crearCarpeta(nombre);
+		accederCarpeta(nombre);
+		return true;
+	}
+	eliminarArchivos(cuenta);
+	carpetasValidas();
+
+	vector<string> carpetas;
+	int carpetasCant = carpetasCont(carpetas);
+	ordenarVector(carpetas);
+	for (int i = 0; i < carpetasCant; i++) {
+		carpetaNom = carpetas[i];
+		newUser = false;
+
+		// Esto aún no ha dado errores, pero no parece que vaya a funcionar muy bien, ya que al usar "break" lo que sucederá será que el bucle for se romperá
+		if (!accederCarpeta(carpetaNom)) {
+			break;
+		}
+		eliminarArchivos(cuenta);
+		// Reitero que esto no va a funcionar muy bien, tal vez sería mejor usar una función aparte para este caso
+		if (contarVariables(cuenta) != 2) {
+			volverCarpetaAnt();
+			eliminarCarpeta(carpetaNom);
+			break;
+		}
+
+		vector<string> datos;
+		cargarVariables(cuenta, datos, 2);
+		if (!datoValido(datos[0]) && !datoValido(datos[1])) {
+			volverCarpetaAnt();
+			eliminarCarpeta(carpetaNom);
+			break;
+		}
+		cuentas.push_back(Cuenta(datos[0], datos[1]));
+		newUser = true;
+		volverCarpetaAnt();
+		if (newUser && carpetaNom != to_string(cuentas.size() - 1)) {
+			cambiarNombreCarpeta(carpetaNom, to_string(cuentas.size() - 1));					
+		}
+	}
+	return true;
 }
+
+// Prototipo general, tal vez funcione o tal vez no, veríficalo detalladamente cuando puedas
+bool verificarCarpeta(const string& carpetaNom) {
+	if (!accederCarpeta(carpetaNom)) {
+		return false;
+	}
+	eliminarArchivos("Cuenta.txt");
+	if (contarVariables("Cuenta.txt") != 2) {
+		volverCarpetaAnt();
+		eliminarCarpeta(carpetaNom);
+		return false;
+	}
+
+	vector<string> datos;
+	cargarVariables("Cuenta.txt", datos, 2);
+	if (!datoValido(datos[0]) && !datoValido(datos[1])) {
+		volverCarpetaAnt();
+		eliminarCarpeta(carpetaNom);
+		return false;
+	}
+	return true;
+}
+
 
 void carpetasValidas() {
 	vector<string> carpetas;
