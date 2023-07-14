@@ -7,7 +7,7 @@
 #include "Carpetas.h"
 #include "Archivos.h"
 #include "Cadenas.h"
-#include "Tarea.h"
+#include "Nota.h"
 #include "Lista.h"
 #include "Cuenta.h"
 using namespace std;
@@ -18,7 +18,8 @@ void registrarse(vector<Cuenta>&);
 void verificarNombre(vector<Cuenta>&, bool&, const string, int&);
 void interfazUsuario(Cuenta&);
 void interfazListas(Cuenta&, const int);
-bool verificarBD(vector<Cuenta>&);
+bool ActualizarBD(vector<Cuenta>&);
+bool verificarCarpeta(const string&, string&, string&);
 void carpetasValidas();
 void eliminarArchivos(const string&);
 
@@ -27,13 +28,13 @@ int main() {
 	vector<Cuenta> cuentas; 
 	char opcion; 
 	const int general = 0, esc = 27; 
-	verificarBD(cuentas);
+	ActualizarBD(cuentas);
 
 	while(true) {
 		encabezado(general);
 		cout<<"\t[1]: Iniciar sesion \n";
 		cout<<"\t[2]: No tiene una cuenta? (registrarse) \n";
-		cout<<"\t[0]: Salir \n";
+		cout<<"\t[X]: Salir \n";
 		cout<<"\t-> ";
 		opcion = getch();
 
@@ -41,13 +42,11 @@ int main() {
 			iniciarSesion(cuentas);
 		} else if (opcion == '2') {
 			registrarse(cuentas);
-		} else if (opcion == '0' || opcion == esc) {
+		} else if (opcion == 'X' || opcion == 'x' || opcion == esc) {
 			break;
 		}
 	}
 
-	// cout<<"\n\n\n";
-	// system("pause");
 	return 0;
 }
 
@@ -231,88 +230,30 @@ void interfazListas(Cuenta& usuario, const int indice){
 	while (true) {
 		encabezado(general);
 		cout<<"\tMostrando lista: <"<<usuario.nombreLista(indice)<<">\n";
-		cout<<"\tEscriba el numero de cualquier nota o tarea para ver mas opciones, o la letra de cualquiera de las opciones\n\n";
-		if (usuario.getCantTareas(indice) == 0) {
-			cout<<"\tActualmente no tiene ninguna tarea en esta lista \n\n";
+		cout<<"\tEscriba el numero de cualquier nota para ver mas opciones, o la letra de cualquiera de las opciones\n\n";
+		if (usuario.getCantNotas(indice) == 0) {
+			cout<<"\tActualmente no tiene ninguna nota en esta lista \n\n";
 		} else {
-			usuario.mostrarTareas(indice);
+			usuario.mostrarNotas(indice);
 		}
-		cout<<"\t[A]: Crear una tarea \n";
-		cout<<"\t[S]: Eliminar una tarea \n";
+		cout<<"\t[A]: Crear una nota \n";
 		cout<<"\t[X]: Volver atras \n";
 		cout<<"\t-> ";
 		getline(cin, opcion);
 		if (opcion == "A" || opcion == "a") {
 			encabezado(general);
-			cout<<"\tEscriba el contenido de la tarea: \n\t";
+			cout<<"\tEscriba el contenido de la nota: ";
 			getline(cin, contenido);
-			usuario.crearTarea(indice, contenido);
-		} else if (opcion == "S" || opcion == "s") {
-
+			usuario.crearNota(indice, contenido);
 		} else if (opcion == "X" || opcion == "x") {
 			break;
 		}
 	}
 }
 
-/* 
-void verificarBD(vector<Cuenta>& cuentas) {
-	const string nombre = "Data", cuenta = "Cuenta.txt";
-	string carpetaNom;
-	bool newUser;
-
-	if (accederCarpeta(nombre)) {
-		eliminarArchivos(cuenta);
-		carpetasValidas();
-
-		vector<string> carpetas;
-		int carpetasCant = carpetasCont(carpetas);
-		ordenarVector(carpetas);
-		for (int i = 0; i < carpetasCant; i++) {
-			carpetaNom = carpetas[i];
-			newUser = false;
-			if (accederCarpeta(carpetaNom)) {
-//				if (existeArchivo(cuenta)) {
-
-					eliminarArchivos(cuenta);
-
-					if (contarVariables(cuenta) == 2) {
-						vector<string> datos;
-						cargarVariables(cuenta, datos, 2);
-						if (datoValido(datos[0]) && datoValido(datos[1])) {
-							cuentas.push_back(Cuenta(datos[0], datos[1]));
-							newUser = true;
-						} else {
-							volverCarpetaAnt();
-							eliminarCarpeta(carpetaNom);
-						}
-
-					} else {
-						volverCarpetaAnt();
-						eliminarCarpeta(carpetaNom);
-					}
-//				} else {
-//					volverCarpetaAnt();
-//					eliminarCarpeta(carpetaNom);
-//				}
-				volverCarpetaAnt();
-				//Hay fallos en esta función, creo que no puede renombrar correctamente las carpetas, tomar en cuenta que pueden haber carpetas que ya ocupan el nombre deseado
-				//por lo cual es posible que no se puedo cambiar el nombre a una carpeta
-				if (newUser && carpetaNom != to_string(cuentas.size() - 1)) {
-					cambiarNombreCarpeta(carpetaNom, to_string(cuentas.size() - 1));					
-				}
-			}
-		}
-
-	} else {
-		crearCarpeta(nombre);
-		accederCarpeta(nombre);
-	}
-}*/
-// ActualizarBD()
 // ActualizarUsuario()
 // ActualizarLista()
-bool verificarBD(vector<Cuenta>& cuentas) {
+bool ActualizarBD(vector<Cuenta>& cuentas) {
 	const string nombre = "Data", cuenta = "Cuenta.txt";
 	string carpetaNom;
 	bool newUser;
@@ -326,42 +267,22 @@ bool verificarBD(vector<Cuenta>& cuentas) {
 
 	vector<string> carpetas;
 	int carpetasCant = carpetasCont(carpetas);
+	string usuario, clave;
 	ordenarVector(carpetas);
-	for (int i = 0; i < carpetasCant; i++) {
-		carpetaNom = carpetas[i];
-		newUser = false;
-
-		// Esto aún no ha dado errores, pero no parece que vaya a funcionar muy bien, ya que al usar "break" lo que sucederá será que el bucle for se romperá
-		if (!accederCarpeta(carpetaNom)) {
-			break;
+	for (const auto& carpetaNom : carpetas) {
+		if (verificarCarpeta(carpetaNom, usuario, clave)) {
+			cuentas.push_back(Cuenta(usuario, clave));
+			// newUser = true;
+			if (/*newUser &&*/ carpetaNom != to_string(cuentas.size() - 1)) {
+				cambiarNombreCarpeta(carpetaNom, to_string(cuentas.size() - 1));					
+			}
 		}
-		eliminarArchivos(cuenta);
-		// Reitero que esto no va a funcionar muy bien, tal vez sería mejor usar una función aparte para este caso
-		if (contarVariables(cuenta) != 2) {
-			volverCarpetaAnt();
-			eliminarCarpeta(carpetaNom);
-			break;
-		}
-
-		vector<string> datos;
-		cargarVariables(cuenta, datos, 2);
-		if (!datoValido(datos[0]) && !datoValido(datos[1])) {
-			volverCarpetaAnt();
-			eliminarCarpeta(carpetaNom);
-			break;
-		}
-		cuentas.push_back(Cuenta(datos[0], datos[1]));
-		newUser = true;
-		volverCarpetaAnt();
-		if (newUser && carpetaNom != to_string(cuentas.size() - 1)) {
-			cambiarNombreCarpeta(carpetaNom, to_string(cuentas.size() - 1));					
-		}
+		
 	}
 	return true;
 }
 
-// Prototipo general, tal vez funcione o tal vez no, veríficalo detalladamente cuando puedas
-bool verificarCarpeta(const string& carpetaNom) {
+bool verificarCarpeta(const string& carpetaNom, string& usuario, string& clave) {
 	if (!accederCarpeta(carpetaNom)) {
 		return false;
 	}
@@ -379,6 +300,9 @@ bool verificarCarpeta(const string& carpetaNom) {
 		eliminarCarpeta(carpetaNom);
 		return false;
 	}
+	usuario = datos[0];
+	clave = datos[1];
+	volverCarpetaAnt();
 	return true;
 }
 

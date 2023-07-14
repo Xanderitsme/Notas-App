@@ -13,6 +13,12 @@ void volverCarpetaAnt();
 bool crearArchivo(const string&);
 void guardarVariable(const string&, const string&);
 bool eliminarCarpeta(const string&);
+int carpetasCont(vector<string>& carpetas);
+bool convertirString(const string, int&);
+bool existeArchivo(const string&);
+void ordenarVector(vector<string>&);
+void cargarVariables(const string&, vector<string>&, const int&);
+bool cambiarNombreCarpeta(const string&, const string&);
 
 class Cuenta {
 	private:
@@ -29,9 +35,9 @@ class Cuenta {
 		void mostrarListas();
 		void eliminarLista(const int);
 		string nombreLista(const int);
-		void mostrarTareas(const int);
-		int getCantTareas(const int);
-		void crearTarea(const int, const string);
+		void mostrarNotas(const int);
+		int getCantNotas(const int);
+		void crearNota(const int, const string);
 		void actualizarListas();
 };
 
@@ -98,16 +104,16 @@ string Cuenta::nombreLista(const int indice) {
 	return listas[indice].getNombre();
 }
 
-void Cuenta::mostrarTareas(const int indice) {
-	listas[indice].mostrarTareas();
+void Cuenta::mostrarNotas(const int indice) {
+	listas[indice].mostrarNotas();
 }
 
-int Cuenta::getCantTareas(const int indice) {
-	return listas[indice].getCantTareas();
+int Cuenta::getCantNotas(const int indice) {
+	return listas[indice].getCantNotas();
 }
 
-void Cuenta::crearTarea(const int indice, const string contenido){
-	listas[indice].crearTarea(contenido);
+void Cuenta::crearNota(const int indice, const string contenido){
+	listas[indice].crearNota(contenido);
 }
 
 void Cuenta::actualizarListas() {
@@ -136,6 +142,7 @@ void Cuenta::actualizarListas() {
 		if (accederCarpeta(carpeta)) {
 			cargarVariables("Lista.txt", datos, 1);
 			listas.push_back(Lista(datos[0]));
+			datos.erase(datos.begin());
 			newList = true;
 			volverCarpetaAnt();
 		}
@@ -143,6 +150,8 @@ void Cuenta::actualizarListas() {
 			cambiarNombreCarpeta(carpeta, to_string(listas.size() - 1));
 		}
 	}
+
+	cantListas = listas.size();
 }
 
 #endif

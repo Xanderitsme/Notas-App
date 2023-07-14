@@ -1,27 +1,27 @@
-#ifndef Tarea_h
-#define Tarea_h
+#ifndef Nota_h
+#define Nota_h
 #include <iostream>
 #include <chrono>
 using namespace std;
 
-class Tarea {
+class Nota {
 	private:
 		string descripcion; 
 		bool cumplida; 
 		chrono::system_clock::time_point inicio; 
 		chrono::system_clock::time_point limite; 
 	public:
-		Tarea(const string);
+		Nota(const string);
 		string getDescripcion();
 };
 
-Tarea::Tarea(const string descripcion) {
+Nota::Nota(const string descripcion) {
 	this->descripcion = descripcion; 
 	cumplida = false; 
 	chrono::system_clock::time_point inicio = std::chrono::system_clock::now();
 }
 
-string Tarea::getDescripcion(){
+string Nota::getDescripcion(){
 	return descripcion;
 }
 #endif
