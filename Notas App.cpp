@@ -7,7 +7,7 @@
 #include "Carpetas.h"
 #include "Archivos.h"
 #include "Cadenas.h"
-#include "Nota.h"
+#include "Tarea.h"
 #include "Lista.h"
 #include "Cuenta.h"
 using namespace std;
@@ -230,21 +230,21 @@ void interfazListas(Cuenta& usuario, const int indice){
 	while (true) {
 		encabezado(general);
 		cout<<"\tMostrando lista: <"<<usuario.nombreLista(indice)<<">\n";
-		cout<<"\tEscriba el numero de cualquier nota para ver mas opciones, o la letra de cualquiera de las opciones\n\n";
-		if (usuario.getCantNotas(indice) == 0) {
-			cout<<"\tActualmente no tiene ninguna nota en esta lista \n\n";
+		cout<<"\tEscriba el numero de cualquier tarea para ver mas opciones, o la letra de cualquiera de las opciones\n\n";
+		if (usuario.getCantTareas(indice) == 0) {
+			cout<<"\tActualmente no tiene ninguna tarea en esta lista \n\n";
 		} else {
-			usuario.mostrarNotas(indice);
+			usuario.mostrarTareas(indice);
 		}
-		cout<<"\t[A]: Crear una nota \n";
+		cout<<"\t[A]: Crear una tarea \n";
 		cout<<"\t[X]: Volver atras \n";
 		cout<<"\t-> ";
 		getline(cin, opcion);
 		if (opcion == "A" || opcion == "a") {
 			encabezado(general);
-			cout<<"\tEscriba el contenido de la nota: ";
+			cout<<"\tEscriba el contenido de la tarea: ";
 			getline(cin, contenido);
-			usuario.crearNota(indice, contenido);
+			usuario.crearTarea(indice, contenido);
 		} else if (opcion == "X" || opcion == "x") {
 			break;
 		}

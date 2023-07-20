@@ -25,12 +25,6 @@ void cargarVariables(const string& nombreArchivo, vector<string>& variables, con
     }
     ifs.close();
 }
-//Prototipo general
-void eliminarDatos(vector<string>& notas){
-    while (notas.size() > 0) {
-        notas.erase(notas.begin());
-    }
-}
 
 void restablecerArchivo(const string& nombreArchivo){
     ofstream archivo(nombreArchivo);

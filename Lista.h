@@ -3,47 +3,47 @@
 #include <iostream>
 #include <chrono>
 #include <vector>
-#include "Nota.h"
+#include "Tarea.h"
 using namespace std;
 
 class Lista {
 	private:
 		string nombre; 
-		vector<Nota> notas; 
-		int cantNotas;
+		vector<Tarea> tareas; 
+		int cantTareas;
 	public:
 		Lista(const string); 
 		string getNombre();
-		void crearNota(const string);
-		void mostrarNotas();
-		int getCantNotas();
+		void crearTarea(const string);
+		void mostrarTareas();
+		int getCantTareas();
 };
 
 Lista::Lista(const string nombre) {
 	this->nombre = nombre; 
-	cantNotas = 0;
+	cantTareas = 0;
 }
 
 string Lista::getNombre(){
 	return nombre;
 }
 
-void Lista::crearNota(const string contenido) {
-	notas.push_back(Nota(contenido));
-	cantNotas++;
+void Lista::crearTarea(const string contenido) {
+	tareas.push_back(Tarea(contenido));
+	cantTareas++;
 }
 
-void Lista::mostrarNotas(){
+void Lista::mostrarTareas(){
 	int indice = 1;
-	for (auto& nota : notas){
-		cout<<"\t["<< indice <<"]: <"<<nota.getDescripcion()<<"> \n";
+	for (auto& tarea : tareas){
+		cout<<"\t["<< indice <<"]: <"<<tarea.getDescripcion()<<"> \n";
 		indice++;
 	}
 	cout<<"\n";
 }
 
-int Lista::getCantNotas(){
-	return cantNotas;
+int Lista::getCantTareas(){
+	return cantTareas;
 }
 
 #endif

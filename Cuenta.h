@@ -35,9 +35,9 @@ class Cuenta {
 		void mostrarListas();
 		void eliminarLista(const int);
 		string nombreLista(const int);
-		void mostrarNotas(const int);
-		int getCantNotas(const int);
-		void crearNota(const int, const string);
+		void mostrarTareas(const int);
+		int getCantTareas(const int);
+		void crearTarea(const int, const string);
 		void actualizarListas();
 };
 
@@ -104,16 +104,16 @@ string Cuenta::nombreLista(const int indice) {
 	return listas[indice].getNombre();
 }
 
-void Cuenta::mostrarNotas(const int indice) {
-	listas[indice].mostrarNotas();
+void Cuenta::mostrarTareas(const int indice) {
+	listas[indice].mostrarTareas();
 }
 
-int Cuenta::getCantNotas(const int indice) {
-	return listas[indice].getCantNotas();
+int Cuenta::getCantTareas(const int indice) {
+	return listas[indice].getCantTareas();
 }
 
-void Cuenta::crearNota(const int indice, const string contenido){
-	listas[indice].crearNota(contenido);
+void Cuenta::crearTarea(const int indice, const string contenido){
+	listas[indice].crearTarea(contenido);
 }
 
 void Cuenta::actualizarListas() {
