@@ -95,4 +95,11 @@ bool eliminarCarpeta(const string& nombre) {
     return false;
 }
 
+bool existeCarpeta(const string& carpetaNom) {
+    if (fs::exists(carpetaNom)) {
+        return true;
+    }
+    return false;
+}
+
 #endif

@@ -8,12 +8,23 @@
 
 using namespace std;
 
-void guardarVariable(const string& nombreArchivo, const string& contenido) {
+bool crearArchivo(const string& nombreArchivo) {
+    ofstream archivo(nombreArchivo);
+    if (archivo.is_open()) {
+        archivo.close();
+        return true;
+    }
+    return false;
+}
+
+bool guardarVariable(const string& nombreArchivo, const string& contenido) {
     ofstream archivo(nombreArchivo, ios::app);
     if (archivo.is_open()) {
         archivo << contenido << endl;
         archivo.close();
+        return true;
     }
+    return false;
 }
 
 void cargarVariables(const string& nombreArchivo, vector<string>& variables, const int& numVariables) {
@@ -46,15 +57,6 @@ int contarVariables(const string& nombreArchivo){
         return numVariables;
     }
     return 0;
-}
-
-bool crearArchivo(const string& nombreArchivo) {
-    ofstream archivo(nombreArchivo);
-    if (archivo.is_open()) {
-        archivo.close();
-        return true;
-    }
-    return false;
 }
 
 bool eliminarArchivo(const string& nombreArchivo) {
