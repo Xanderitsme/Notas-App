@@ -6,15 +6,6 @@
 #include "Lista.h"
 using namespace std;
 
-// ALT GR + 4 = ~
-
-bool crearCarpeta(const string &);
-bool eliminarCarpeta(const string&);
-bool accederCarpeta(const string&);
-void volverCarpetaAnt();
-bool crearArchivo(const string&);
-bool guardarVariable(const string&, const string&);
-
 class Cuenta {
 	private:
 		string usuario, clave;
@@ -23,7 +14,7 @@ class Cuenta {
 	public:
 		Cuenta(const string&, const string&);
 		string getUsuario();
-		bool guardarRegistro(const int&);
+		bool credencialesCorrectas(const string&, const string&);
 		
 };
 
@@ -36,31 +27,12 @@ string Cuenta::getUsuario() {
 	return usuario;
 }
 
-bool Cuenta::guardarRegistro(const int& ID) {
-	const string cuenta = "Cuenta.txt";
-
-	if (!crearCarpeta(to_string(ID))) {
-		return false;
-	}
-
-	if (!accederCarpeta(to_string(ID))) {
-		return false;
-	}
-
-	if (!crearArchivo(cuenta)) {
-		return false;
-	}
-
-	if (!guardarVariable(cuenta, usuario)) {
-		return false;
-	}
-
-	if (!guardarVariable(cuenta, clave)) {
-		return false;
+bool Cuenta::credencialesCorrectas(const string& usuario, const string& clave) {
+	if (usuario == this->usuario && clave == this->clave) {
+		return true;
 	}
 	
-	volverCarpetaAnt();
-	return true;
+	return false;
 }
 
 #endif

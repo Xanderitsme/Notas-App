@@ -22,9 +22,9 @@ bool datoValido(const string& cadena) {
     return true;
 }
 
-bool convertirString(const string cadena, int& indice){
+bool convertirStringInt(const string& cadena, int& numero) {
 	try {
-        indice = stoi(cadena) - 1;	
+        numero = stoi(cadena);
     } catch (const exception& e) {
 		return false;
     }

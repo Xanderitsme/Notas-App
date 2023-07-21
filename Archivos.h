@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <windows.h>
 #include <fstream>
 #include <string>
 
@@ -45,7 +46,7 @@ void restablecerArchivo(const string& nombreArchivo){
     }
 }
 
-int contarVariables(const string& nombreArchivo){
+int cantidadVariables(const string& nombreArchivo){
     int numVariables = 0;
     string linea;
     ifstream archivo(nombreArchivo);
