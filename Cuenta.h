@@ -13,18 +13,16 @@ class Cuenta {
 
 	public:
 		Cuenta(const string&, const string&);
-		string getUsuario();
 		bool credencialesCorrectas(const string&, const string&);
-		
+		string getUsuario();
+		void crearLista(const string&);
+		void mostrarListas();
+		int getCantListas();
 };
 
 Cuenta::Cuenta(const string& usuario, const string& clave) {
 	this->usuario = usuario;
 	this->clave = clave;
-}
-
-string Cuenta::getUsuario() {
-	return usuario;
 }
 
 bool Cuenta::credencialesCorrectas(const string& usuario, const string& clave) {
@@ -33,6 +31,39 @@ bool Cuenta::credencialesCorrectas(const string& usuario, const string& clave) {
 	}
 	
 	return false;
+}
+
+string Cuenta::getUsuario() {
+	return usuario;
+
+}
+
+void Cuenta::crearLista(const string& nombreLista) {
+	listas.push_back(Lista(nombreLista));
+}
+
+void Cuenta::mostrarListas() {
+	const int limiteNombre = 40;
+	int indice = 1;
+	string nombreRecortado;
+	for (auto& lista : listas) {
+		cout << "\t[" << indice << "]: <";
+
+		if (lista.getNombre().size() > limiteNombre) {
+			nombreRecortado = lista.getNombre().substr(0, limiteNombre);
+			cout << nombreRecortado << "...";
+		} else {
+			cout << lista.getNombre();
+		}
+
+		cout << ">\n";
+		indice++;
+	}
+	cout << "\n";
+}
+
+int Cuenta::getCantListas() {
+	return listas.size();
 }
 
 #endif

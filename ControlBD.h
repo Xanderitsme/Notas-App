@@ -48,6 +48,7 @@ bool carpetaValida(const string& carpetaNom) {
     return true;
 }
 
+// Le falta verificar si hay cuentas duplicadas para evitar almacenarlas
 void ActualizarBD() {
     const string data = "Data";
 
@@ -143,6 +144,10 @@ bool registrarCuentaBD(const string& usuario, const string& clave, const int& ID
 	
 	volverCarpetaAnt();
 	return true;
+}
+
+bool registrarListaBD(const string& nombreLista, const int& ID) {
+    return false;
 }
 
 #endif

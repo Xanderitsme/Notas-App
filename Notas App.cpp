@@ -12,6 +12,7 @@ using namespace std;
 
 void encabezado();
 void mensajeError(char&);
+bool salir(const string&);
 void iniciarSesion(vector<Cuenta>&);
 void registrarse(vector<Cuenta>&);
 int getID(vector<Cuenta>&, const string&);
@@ -19,9 +20,12 @@ bool cuentaRegistrada(vector<Cuenta>&, const string&);
 bool usuarioValido(vector<Cuenta>&, const string&);
 bool registrarCuentaBD(const string&, const string&, const int&);
 
+void cambiarTema(bool&);
 void interfazCuenta(Cuenta&);
+void crearLista(Cuenta&);
 
 int main() {
+	system("color 07");
 	ActualizarBD();
 	
 	vector<Cuenta> cuentas; 
@@ -86,30 +90,46 @@ void mensajeError(char& tecla) {
 	tecla = getch();
 }
 
+bool salir(const string& opcion) {
+	if (opcion == "X" || opcion == "x") {
+		return true;
+	}
+	return false;
+}
+
 void iniciarSesion(vector<Cuenta>& cuentas) {
 	const int esc = 27, intentosMax = 3;
 	int intentos = 0, ID;
 	char tecla = 0;
 	string usuario, clave;
+	bool accesoConcedido = false;
 
-	while (tecla != esc && tecla != 'X' && tecla != 'x' && intentos < intentosMax) {
+	while (tecla != esc && tecla != 'X' && tecla != 'x' && intentos < intentosMax && !accesoConcedido) {
 		encabezado();
 		cout << "\tIngrese su nombre de usuario: ";
 		getline(cin, usuario);
+		if (salir(usuario)) {
+			return;
+		}
+
 		if (cuentaRegistrada(cuentas, usuario)) {
 			cout << "\tIngrese su clave: ";
 			getline(cin, clave);
+			if (salir(clave)) {
+				return;
+			}
+
 			intentos++;
 			ID = getID(cuentas, usuario);
 			if (cuentas[ID].credencialesCorrectas(usuario, clave)) {
 				encabezado();
 				cout << "\tHa iniciado sesion como <" << usuario << "> \n";
 				getch();
-				interfazCuenta(cuentas[ID]);
+				accesoConcedido = true;
 
 			} else {
 				encabezado();
-				cout << "\tLa clave es incorrecta, vuelva a intentarlo (" << intentosMax - intentos << " intento restantes)\n";
+				cout << "\tLa clave es incorrecta, vuelva a intentarlo (" << intentosMax - intentos << " intentos restantes)\n";
 				mensajeError(tecla);
 			}
 
@@ -119,6 +139,17 @@ void iniciarSesion(vector<Cuenta>& cuentas) {
 			mensajeError(tecla);
 		}
 	}
+
+	if (!accesoConcedido) {
+		return;
+	}
+
+	if (!accederCarpeta) {
+		cout << "Ha ocurrido un error al intentar acceder a su cuenta, vuelva a intentarlo\n";
+		return;
+	}
+
+	interfazCuenta(cuentas[ID]);
 }
 
 void registrarse(vector<Cuenta>& cuentas) {
@@ -130,14 +161,22 @@ void registrarse(vector<Cuenta>& cuentas) {
 		encabezado();
 		cout << "\tCree su nombre de usuario: ";
 		getline(cin, usuario);
+		if (salir(usuario)) {
+			return;
+		}
+
 		if (usuarioValido(cuentas, usuario)) {
 			cout << "\tCree su clave: ";
 			getline(cin, clave);
+			if (salir(clave)) {
+				return;
+			}
+
 			if (datoValido(clave)) {
 				if (registrarCuentaBD(usuario, clave, cuentas.size())) {
 					encabezado();
 					cout << "\tLa cuenta <" << usuario << "> se ha registrado con exito!\n";
-					cout << "\tAhora puede acceder a su cuenta\n";
+					cout << "\tAhora puede iniciar sesion\n";
 					getch();
 					return;
 				} else {
@@ -195,6 +234,59 @@ bool usuarioValido(vector<Cuenta>& cuentas, const string& usuario) {
 	return true;
 }
 
+void cambiarTema(bool& temaClaro) {
+	if (temaClaro) {
+		// Tema oscuro
+		system("color 07");
+	} else {
+		// Tema claro
+		system("color 70");
+	}
+	temaClaro = !temaClaro;
+}
+
 void interfazCuenta(Cuenta& cuenta) {
-	
+	string opcion, nombreLista;
+	bool temaClaro = false;
+
+	while (opcion != "X" && opcion != "x") {
+		encabezado();
+		cout << "\tBienvenido! <" << cuenta.getUsuario() << ">, es un gusto tenerlo aqui nuevamente.\n";
+		cout << "\tEscriba el numero de alguna lista para acceder o la letra de cualquiera de las opciones.\n\n";
+
+		if (cuenta.getCantListas() == 0) {
+			cout << "\tActualmente no tiene ninguna lista creada!\n";
+		}
+		cuenta.mostrarListas();
+
+		cout << "\t[A]: Crear una lista\n";
+		cout << "\t[S]: Combinar listas\n";
+		cout << "\t[D]: Cambiar al modo claro/oscuro\n";
+		cout << "\t[F]: Configuracion avanzada\n";
+		cout << "\t[X]: Salir de la cuenta\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (opcion == "A" || opcion == "a") {
+			crearLista(cuenta);
+		} else if (opcion == "S" || opcion == "s") {
+
+		} else if (opcion == "D" || opcion == "d") {
+			cambiarTema(temaClaro);
+		} else if (opcion == "F" || opcion == "f") {
+
+		} 
+	}
+
+	volverCarpetaAnt();
+}
+
+void crearLista(Cuenta& cuenta) {
+	string nombreLista;
+	encabezado();
+	cout << "\tIngrese un nombre para la nueva lista: ";
+	getline(cin, nombreLista);
+	cuenta.crearLista(nombreLista);
+	cout << "\tLa lista <" << nombreLista << "> se ha creado con exito \n";
+	getch();
 }
