@@ -11,6 +11,7 @@ bool existeCarpeta(const string&);
 bool crearCarpeta(const string &);
 bool accederCarpeta(const string&);
 bool cambiarNombreCarpeta(const string&, const string&);
+void volverCarpetaAnt();
 
 bool existeArchivo(const string&);
 int cantidadVariables(const string&);
@@ -29,7 +30,7 @@ void error() {
     cout << "\tHa ocurrido un error al intentar cargar la base de datos\n";
     cout << "\tPruebe a volver a iniciar el programa\n";
     getch();
-    system("exit");
+    exit(0);
 }
 
 bool carpetaValida(const string& carpetaNom) {
@@ -61,6 +62,7 @@ bool carpetaValida(const string& carpetaNom) {
 }
 
 // Le falta verificar si hay cuentas duplicadas para evitar almacenarlas
+// Falta eliminar las carpetas que no son validas
 void ActualizarBD() {
     const string data = "Data";
 
@@ -72,6 +74,7 @@ void ActualizarBD() {
         return;
     }
     if (!accederCarpeta(data)) {
+        error();
         return;
     }
 
@@ -79,7 +82,7 @@ void ActualizarBD() {
     vector<string> nombresInt;
     vector<string> nombresString;
     int num, carpetasCant = carpetasCont(carpetas);
-    for (const auto& carpetaNom : carpetas) {
+    for (auto& carpetaNom : carpetas) {
         if (carpetaValida(carpetaNom)) {
             if (convertirStringInt(carpetaNom, num)) {
                 nombresInt.push_back(carpetaNom);
@@ -87,6 +90,7 @@ void ActualizarBD() {
                 nombresString.push_back(carpetaNom);
             }
         } else {
+            volverCarpetaAnt();
             eliminarCarpeta(carpetaNom);
         }
     }
@@ -118,18 +122,19 @@ bool cargarDatosCuenta(const string& carpetaNom, string& usuario, string& clave)
     volverCarpetaAnt();
     return true;
 }
-
 // Falta la actualización de nombres de las carpetas
 void actualizarCuentas(vector<Cuenta>& cuentas) {
     string usuario, clave;
     vector<string> carpetas;
     int carpetasCant = carpetasCont(carpetas);
+    ordenarVector(carpetas);
     for (const auto& carpetaNom : carpetas) {
         if (cargarDatosCuenta(carpetaNom, usuario, clave)) {
             if (!cuentaRegistrada(cuentas, usuario)) {
                 cuentas.push_back(Cuenta(usuario, clave));
             }
         } else {
+            cout << "no se pudieron cargar los datos de la cuenta " << carpetaNom << "\n";
             error();
         }
     }
@@ -201,18 +206,19 @@ bool cargarDatosLista(const string& carpetaNom, string& nombreLista) {
 
     volverCarpetaAnt();
     return true;
-}    
+}
 
 void actualizarListas(Cuenta& cuenta) {
     cuenta.eliminarListas();
     string nombreLista;
     vector<string> carpetas;
     int carpetasCant = carpetasCont(carpetas);
+    ordenarVector(carpetas);
     for (const auto& carpetaNom : carpetas) {
         if (cargarDatosLista(carpetaNom, nombreLista)) {
             cuenta.crearLista(nombreLista);
         } else {
-            error();
+            // error();
         }
     }
 }

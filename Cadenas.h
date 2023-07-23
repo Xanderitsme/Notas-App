@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <cctype>
 #include <vector>
-#include <stdexcept>
 using namespace std;
 
 bool datoValido(const string& cadena) {
@@ -23,12 +22,14 @@ bool datoValido(const string& cadena) {
 }
 
 bool convertirStringInt(const string& cadena, int& numero) {
-	try {
-        numero = stoi(cadena);
-    } catch (const exception& e) {
-		return false;
+    for (char caracter : cadena) {
+        if (!isdigit(caracter)) {
+            return false;
+        }
     }
-	return true;
+    
+    numero = stoi(cadena);
+    return true;
 }
 
 void ordenarVector(vector<string>& cadenas) {

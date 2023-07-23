@@ -11,6 +11,7 @@
 using namespace std;
 
 void encabezado();
+void separador();
 void mensajeError(char&);
 bool salir(const string&);
 
@@ -61,12 +62,12 @@ int main() {
 void encabezado() {
     char upLeft = 201, horizontal = 205, upRigth = 187, vertical = 186, downLeft = 200, downRight = 188, diamond = 4, punto = 250, linea = 22;
     string title = "Notas App";
-    const int titleSize = title.size(), styleLenght = 32;
+    const int styleLenght = 32;
 
     system("cls");
 	// Primera linea
     cout << "\t" << upLeft;
-    for (int i = 0; i < (styleLenght + titleSize)  ; i++) {
+    for (int i = 0; i < (styleLenght + title.size()); i++) {
         cout << horizontal;
     }
     cout << upRigth;
@@ -82,7 +83,7 @@ void encabezado() {
 
     // Tercera linea
     cout << "\t" << vertical << "  " << diamond << " ";
-    for (int i = 0; i < 24 + titleSize; i++) {
+    for (int i = 0; i < 24 + title.size(); i++) {
         cout << linea;
     }
     cout << " " << diamond << "  " << vertical;
@@ -91,7 +92,7 @@ void encabezado() {
 
 	// Cuarta linea
     cout << "\t" << downLeft;
-    for (int i = 0; i < (styleLenght + titleSize); i++) {
+    for (int i = 0; i < (styleLenght + title.size()); i++) {
         cout << horizontal;
     }
     cout << downRight;
@@ -108,6 +109,15 @@ void encabezado() {
     //   ║  ♦ ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ♦  ║    ║ o volver   ║
 	//   ╚═════════════════════════════════════════╝    ╚════════════╝
 
+}
+
+void separador() {
+	const char linea = 22;
+	cout << "\n\t";
+	for (int i = 0; i < 45; i++) {
+		cout << linea << " ";
+	}
+	cout << "\n\n";
 }
 
 void mensajeError(char& tecla) {
@@ -184,7 +194,6 @@ int getID(vector<Cuenta>& cuentas, const string& usuario) {
 	return ID;
 }
 
-// Error de llamadas infinitas con la funcion actualizarCuentas
 bool cuentaRegistrada(vector<Cuenta>& cuentas, const string& usuario) {
 	for (auto& cuenta : cuentas) {
 		if (usuario == cuenta.getUsuario()) {
@@ -289,7 +298,7 @@ void interfazCuenta(Cuenta& cuenta, const int& ID) {
 			cout << "\tActualmente no tiene ninguna lista creada!\n";
 		}
 		cuenta.mostrarListas();
-
+		separador();
 		cout << "\t[A]: Crear una lista\n";
 		cout << "\t[S]: Combinar listas\n";
 		cout << "\t[D]: Configuracion avanzada\n";
@@ -320,6 +329,9 @@ void crearLista(Cuenta& cuenta) {
 		return;
 	}
 
+	encabezado();
+	cout << "\tLa lista <" << nombreLista << "> se ha creado con exito!\n";
+	getch();
 	registrarListaBD(nombreLista, ID);
 }
 

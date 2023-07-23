@@ -58,6 +58,7 @@ void Cuenta::eliminarListas() {
 }
 
 void Cuenta::mostrarListas() {
+	const string fin = "...";
 	const int limiteNombre = 40;
 	int indice = 1;
 	string nombreRecortado;
@@ -65,8 +66,8 @@ void Cuenta::mostrarListas() {
 		cout << "\t[" << indice << "]: <";
 
 		if (lista.getNombre().size() > limiteNombre) {
-			nombreRecortado = lista.getNombre().substr(0, limiteNombre);
-			cout << nombreRecortado << "...";
+			nombreRecortado = lista.getNombre().substr(0, limiteNombre - fin.size());
+			cout << nombreRecortado << fin;
 		} else {
 			cout << lista.getNombre();
 		}
@@ -74,7 +75,6 @@ void Cuenta::mostrarListas() {
 		cout << ">\n";
 		indice++;
 	}
-	cout << "\n";
 }
 
 int Cuenta::getCantListas() {
