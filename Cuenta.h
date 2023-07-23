@@ -15,7 +15,12 @@ class Cuenta {
 		Cuenta(const string&, const string&);
 		bool credencialesCorrectas(const string&, const string&);
 		string getUsuario();
+		void cambiarUsuario(const string&);
+
+
 		void crearLista(const string&);
+		void eliminarLista(const int&);
+		void eliminarListas();
 		void mostrarListas();
 		int getCantListas();
 };
@@ -38,8 +43,18 @@ string Cuenta::getUsuario() {
 
 }
 
+void Cuenta::cambiarUsuario(const string& usuario) {
+	this->usuario = usuario;
+}
+
 void Cuenta::crearLista(const string& nombreLista) {
 	listas.push_back(Lista(nombreLista));
+}
+
+void Cuenta::eliminarListas() {
+	while(listas.size() > 0) {
+		listas.erase(listas.begin());
+	}
 }
 
 void Cuenta::mostrarListas() {

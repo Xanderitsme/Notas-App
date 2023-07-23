@@ -38,7 +38,7 @@ void cargarVariables(const string& nombreArchivo, vector<string>& variables, con
     ifs.close();
 }
 
-void restablecerArchivo(const string& nombreArchivo){
+void restablecerArchivo(const string& nombreArchivo) {
     ofstream archivo(nombreArchivo);
     if (archivo.is_open()) {
         archivo << "";
@@ -46,7 +46,7 @@ void restablecerArchivo(const string& nombreArchivo){
     }
 }
 
-int cantidadVariables(const string& nombreArchivo){
+int cantidadVariables(const string& nombreArchivo) {
     int numVariables = 0;
     string linea;
     ifstream archivo(nombreArchivo);
