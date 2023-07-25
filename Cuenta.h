@@ -16,6 +16,7 @@ class Cuenta {
 		bool credencialesCorrectas(const string&, const string&);
 		string getUsuario();
 		void cambiarUsuario(const string&);
+		void cambiarClave(const string&);
 
 		void crearLista(const string&);
 		void eliminarLista(const int&);
@@ -48,6 +49,10 @@ string Cuenta::getUsuario() {
 
 void Cuenta::cambiarUsuario(const string& usuario) {
 	this->usuario = usuario;
+}
+
+void Cuenta::cambiarClave(const string& clave) {
+	this->clave = clave;
 }
 
 void Cuenta::crearLista(const string& nombreLista) {

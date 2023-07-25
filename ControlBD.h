@@ -159,6 +159,25 @@ bool cambiarUsuarioBD(const string& usuario) {
     return true;
 }
 
+bool cambiarClaveBD(const string& clave) {
+    const string cuenta = "Cuenta.txt";
+    string usuario;
+    vector<string> datos;
+    cargarVariables(cuenta, datos, 2);
+    usuario = datos[0];
+    restablecerArchivo(cuenta);
+
+    if (!guardarVariable(cuenta, usuario)) {
+		return false;
+	}
+
+	if (!guardarVariable(cuenta, clave)) {
+		return false;
+	}
+    
+    return true;
+}
+
 bool registroGeneral(const string& nombreArchivo, const int& ID) {
 	if (!crearCarpeta(to_string(ID))) {
 		return false;

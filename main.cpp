@@ -26,10 +26,12 @@ bool usuarioValido(vector<Cuenta>&, const string&);
 bool usuarioValidoCambio(const string&, const int&);
 
 void interfazCuenta(Cuenta&, const int&);
-void interfazLista(Cuenta&, const int&);
 void crearLista(Cuenta&);
 void configuracionAvanzada(Cuenta&, const int&);
 void cambiarUsuario(Cuenta&, const int&);
+void cambiarClave(Cuenta&, const int&);
+
+void interfazLista(Cuenta&, const int&);
 
 int main() {
 	system("color 07");
@@ -68,7 +70,7 @@ void encabezado(const string& titulo) {
     const int styleLenght = 32, bordes = 10;
 
 	if (titulo.size() > styleLenght + title.size() - bordes) {
-		tituloMod = titulo.substr(0, styleLenght + title.size() - bordes) + "...";
+		tituloMod = titulo.substr(0, styleLenght + title.size() - bordes - 1) + "...";
 	} else if (titulo.size() > 0){
 		tituloMod+= " ";
 	}
@@ -165,13 +167,14 @@ bool salir(const string& opcion) {
 
 void iniciarSesion(vector<Cuenta>& cuentas) {
 	const int esc = 27, intentosMax = 3;
+	const string titulo = "Iniciar sesion";
 	int intentos = 0, ID;
 	char tecla = 0;
 	string usuario, clave;
 	bool accesoConcedido = false;
 
 	while (tecla != esc && tecla != 'X' && tecla != 'x' && intentos < intentosMax && !accesoConcedido) {
-		encabezado("Iniciar sesion");
+		encabezado(titulo);
 		cout << "\tIngrese su nombre de usuario: ";
 		getline(cin, usuario);
 		if (salir(usuario)) {
@@ -187,10 +190,9 @@ void iniciarSesion(vector<Cuenta>& cuentas) {
 			
 			intentos++;
 			ID = getID(cuentas, usuario);
-			encabezado("Iniciar sesion");
+			encabezado(titulo);
 			if (cuentas[ID].credencialesCorrectas(usuario, clave)) {
 				cout << "\tHa iniciado sesion como <" << usuario << "> \n";
-				cargando();
 				accesoConcedido = true;
 
 			} else {
@@ -199,7 +201,7 @@ void iniciarSesion(vector<Cuenta>& cuentas) {
 			}
 
 		} else {
-			encabezado("");
+			encabezado(titulo);
 			cout << "\tNo existe una cuenta con el nombre <" << usuario << ">, verifique si esta bien escrito\n";
 			mensajeError(tecla);
 		}
@@ -209,6 +211,7 @@ void iniciarSesion(vector<Cuenta>& cuentas) {
 		return;
 	}
 
+	cargando();
 	interfazCuenta(cuentas[ID], ID);
 }
 
@@ -236,11 +239,12 @@ bool cuentaRegistrada(vector<Cuenta>& cuentas, const string& usuario) {
 
 void registrarse(vector<Cuenta>& cuentas) {
 	const int esc = 27;
-	char tecla = 0;
+	const string titulo = "Registrarse";
 	string usuario, clave;
+	char tecla = 0;
 
 	while (tecla != esc && tecla != 'X' && tecla != 'x') {
-		encabezado("Registrarse");
+		encabezado(titulo);
 		cout << "\tCree su nombre de usuario: ";
 		getline(cin, usuario);
 		if (salir(usuario)) {
@@ -256,7 +260,7 @@ void registrarse(vector<Cuenta>& cuentas) {
 
 			if (datoValido(clave)) {
 				if (registrarCuentaBD(usuario, clave, cuentas.size())) {
-					encabezado("Registrarse");
+					encabezado(titulo);
 					cout << "\tLa cuenta <" << usuario << "> se ha registrado con exito!\n";
 					cout << "\tAhora puede iniciar sesion\n";
 					cargando();
@@ -267,7 +271,7 @@ void registrarse(vector<Cuenta>& cuentas) {
 				}
 
 			} else {
-				encabezado("");
+				encabezado(titulo);
 				cout << "\tLa clave no puede tener menos de 4 o mas de 30 caracteres y tampoco ser solo espacios en blanco\n";
 				mensajeError(tecla);
 			}
@@ -353,6 +357,165 @@ void interfazCuenta(Cuenta& cuenta, const int& ID) {
 	volverCarpetaAnt();
 }
 
+void crearLista(Cuenta& cuenta) {
+	const int ID = cuenta.getCantListas();
+	const string titulo;
+	string nombreLista;
+
+	encabezado(titulo);
+	cout << "\tIngrese un nombre para la nueva lista: ";
+	getline(cin, nombreLista);
+	if (salir(nombreLista)) {
+		return;
+	}
+
+	encabezado(titulo);
+	cout << "\tLa lista <" << nombreLista << "> se ha creado con exito!\n";
+	cargando();
+	registrarListaBD(nombreLista, ID);
+}
+
+void configuracionAvanzada(Cuenta& cuenta, const int& ID) {
+	const string titulo = "Configuracion avanzada";
+	string opcion;
+
+	while (opcion != "X" && opcion != "x") {
+		encabezado(titulo);
+		cout << "\tEscriba la letra de la opcion que desee. \n\n";
+		cout << "\t[A]: Cambiar nombre de usuario\n";
+		cout << "\t[S]: Cambiar clave\n";
+		cout << "\t[D]: Eliminar cuenta\n";
+		cout << "\t[X]: Volver\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (opcion == "A" || opcion == "a") {
+			cambiarUsuario(cuenta, ID);
+		} else if (opcion == "S" || opcion == "s") {
+			cambiarClave(cuenta, ID); 
+		} else if (opcion == "D" || opcion == "d") {
+			
+		} else if (!salir(opcion) && opcion != "") {
+			opcionInvalida();
+		}
+	}
+}
+
+void cambiarUsuario(Cuenta& cuenta, const int& ID) {
+	const int esc = 27;
+	const string titulo = "Cambiar usuario";
+	string usuario, clave;
+	bool cambioNombre = false;
+	char tecla = 0;
+
+	while (tecla != esc && tecla != 'X' && tecla != 'x' && !cambioNombre) {
+		encabezado(titulo);
+		cout << "\tIngrese su nuevo nombre de usuario: ";
+		getline(cin, usuario);
+		if (salir(usuario)) {
+			return;
+		}
+
+		if (usuarioValidoCambio(usuario, ID)) {
+			cout << "\tIngrese su clave para confirmar esta accion: ";
+			getline(cin, clave);
+			if (salir(clave)) {
+				return;
+			}
+
+			encabezado(titulo);
+			if (cuenta.credencialesCorrectas(cuenta.getUsuario(), clave)) {
+				cout << "\tSu nuevo nombre de usuario es <" << usuario << "> \n";
+				cargando();
+				cambioNombre = true;
+
+			} else {
+				cout << "\tLa clave es incorrecta\n";
+				mensajeError(tecla);
+			}
+
+		} else {
+			mensajeError(tecla);
+		}
+	}
+
+	if (!cambioNombre) {
+		return;
+	}
+
+	if (!cambiarUsuarioBD(usuario)) {
+		cout << "Ha ocurrido un error al intentar cambiar su nombre de usuario\n";
+		mensajeError(tecla);
+		return;
+	}
+	cuenta.cambiarUsuario(usuario);
+}
+
+void cambiarClave(Cuenta& cuenta, const int& ID) {
+	const int esc = 27;
+	const string titulo = "Cambiar clave";
+	string usuario, clave, nuevaClave1, nuevaClave2;
+	bool cambioClave = false;
+	char tecla = 0;
+
+	while (tecla != esc && tecla != 'X' && tecla != 'x' && !cambioClave) {
+		encabezado(titulo);
+		cout << "\tEs necesario confirmar su identidad antes de continuar\n\n";
+		cout << "\tIngrese su clave actual: ";
+		getline(cin, clave);
+		if (salir(clave)) {
+			return;
+		}
+
+		if (cuenta.credencialesCorrectas(cuenta.getUsuario(), clave)) {
+			encabezado(titulo);
+			cout << "\tIngrese su nueva clave: ";
+			getline(cin, nuevaClave1);
+			if (salir(clave)) {
+				return;
+			}
+
+			if (datoValido(clave)) {
+				cout << "\tVuelva a ingresar su nueva clave: ";
+				getline(cin, nuevaClave2);
+				if (salir(nuevaClave2)) {
+					return;
+				}
+				
+				if (nuevaClave1 == nuevaClave2) {
+					encabezado(titulo);
+					cout << "\tSu clave ha sido cambiada correctamente!\n";
+					cargando();
+					cambioClave = true;
+					
+				} else {
+					cout << "\tLas claves no son iguales\n";
+					mensajeError(tecla);
+				}
+
+			} else {
+				cout << "\tLa clave no puede tener menos de 4 o mas de 30 caracteres y tampoco ser solo espacios en blanco\n";
+			}
+
+		} else {
+			encabezado(titulo);
+			cout << "\tLa clave es incorrecta\n";
+			mensajeError(tecla);
+		}
+	}
+
+	if (!cambioClave) {
+		return;
+	}
+
+	if (!cambiarClaveBD(nuevaClave1)) {
+		cout << "Ha ocurrido un error al intentar cambiar su clave\n";
+		mensajeError(tecla);
+		return;
+	}
+	cuenta.cambiarClave(nuevaClave1);
+}
+
 void interfazLista(Cuenta& cuenta, const int& listaID) {
 	if (!accederCarpeta(to_string(listaID))) {
 		cout << "Ha ocurrido un error al intentar acceder a la lista, por favor vuelva a intentarlo\n";
@@ -360,11 +523,12 @@ void interfazLista(Cuenta& cuenta, const int& listaID) {
 		return;
 	}
 
+	const string titulo = "Ver lista";
 	string opcion;
 
 	while (opcion != "X" && opcion != "x") {
 		// actualizarTareas();
-		encabezado("Ver lista");
+		encabezado(titulo);
 		cout << "\tMostrado la lista <" << cuenta.getNombreLista(listaID) << ">\n";
 		cout << "\tEscriba el numero de alguna tarea para ver mas opciones, o la letra de cualquiera de las opciones\n";
 
@@ -390,95 +554,4 @@ void interfazLista(Cuenta& cuenta, const int& listaID) {
 	}
 
 	volverCarpetaAnt();
-}
-
-void crearLista(Cuenta& cuenta) {
-	string nombreLista;
-	const int ID = cuenta.getCantListas();
-
-	encabezado("Crear lista");
-	cout << "\tIngrese un nombre para la nueva lista: ";
-	getline(cin, nombreLista);
-	if (salir(nombreLista)) {
-		return;
-	}
-
-	encabezado("Crear lista");
-	cout << "\tLa lista <" << nombreLista << "> se ha creado con exito!\n";
-	cargando();
-	registrarListaBD(nombreLista, ID);
-}
-
-void configuracionAvanzada(Cuenta& cuenta, const int& ID) {
-	string opcion;
-
-	while (opcion != "X" && opcion != "x") {
-		encabezado("Configuracion avanzada");
-		cout << "\tEscriba la letra de la opcion que desee. \n\n";
-		cout << "\t[A]: Cambiar nombre de usuario\n";
-		cout << "\t[S]: Cambiar clave\n";
-		cout << "\t[D]: Eliminar cuenta\n";
-		cout << "\t[X]: Volver\n";
-		cout << "\t-> ";
-		getline(cin, opcion);
-
-		if (opcion == "A" || opcion == "a") {
-			cambiarUsuario(cuenta, ID);
-		} else if (opcion == "S" || opcion == "s") {
-
-		} else if (opcion == "D" || opcion == "d") {
-			
-		} else if (!salir(opcion) && opcion != "") {
-			opcionInvalida();
-		}
-	}
-}
-
-void cambiarUsuario(Cuenta& cuenta, const int& ID) {
-	const int esc = 27;
-	char tecla = 0;
-	string usuario, clave;
-	bool cambioNombre = false;
-
-	while (tecla != esc && tecla != 'X' && tecla != 'x' && !cambioNombre) {
-		encabezado("Cambiar usuario");
-		cout << "\tIngrese su nuevo nombre de usuario: ";
-		getline(cin, usuario);
-		if (salir(usuario)) {
-			return;
-		}
-
-		if (usuarioValidoCambio(usuario, ID)) {
-			cout << "\tIngrese su clave para confirmar esta accion: ";
-			getline(cin, clave);
-			if (salir(clave)) {
-				return;
-			}
-
-			encabezado("Cambiar usuario");
-			if (cuenta.credencialesCorrectas(cuenta.getUsuario() ,clave)) {
-				cout << "\tSu nuevo nombre de usuario es <" << usuario << "> \n";
-				cargando();
-				cambioNombre = true;
-
-			} else {
-				cout << "\tLa clave es incorrecta\n";
-				mensajeError(tecla);
-			}
-
-		} else {
-			mensajeError(tecla);
-		}
-	}
-
-	if (!cambioNombre) {
-		return;
-	}
-
-	if (!cambiarUsuarioBD(usuario)) {
-		cout << "Ha ocurrido un error al intentar cambiar su nombre de usuario, \n";
-		mensajeError(tecla);
-		return;
-	}
-	cuenta.cambiarUsuario(usuario);
 }
