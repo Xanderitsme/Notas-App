@@ -28,8 +28,8 @@ bool cuentaRegistrada(vector<Cuenta>&, const string&);
 
 void error() {
     cout << "\tHa ocurrido un error al intentar cargar la base de datos\n";
-    cout << "\tPruebe a volver a iniciar el programa\n";
-    getch();
+    cout << "\tPruebe a volver a iniciar el programa\n\n";
+    system("pause");
     exit(0);
 }
 

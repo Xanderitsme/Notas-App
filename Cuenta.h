@@ -17,12 +17,15 @@ class Cuenta {
 		string getUsuario();
 		void cambiarUsuario(const string&);
 
-
 		void crearLista(const string&);
 		void eliminarLista(const int&);
 		void eliminarListas();
 		void mostrarListas();
 		int getCantListas();
+		
+		string getNombreLista(const int&);
+		void crearTarea(const int&);
+		int getCantTareas(const int&);
 };
 
 Cuenta::Cuenta(const string& usuario, const string& clave) {
@@ -49,6 +52,10 @@ void Cuenta::cambiarUsuario(const string& usuario) {
 
 void Cuenta::crearLista(const string& nombreLista) {
 	listas.push_back(Lista(nombreLista));
+}
+
+void Cuenta::eliminarLista(const int& ID) {
+
 }
 
 void Cuenta::eliminarListas() {
@@ -79,6 +86,18 @@ void Cuenta::mostrarListas() {
 
 int Cuenta::getCantListas() {
 	return listas.size();
+}
+
+string Cuenta::getNombreLista(const int& ID) {
+	return listas[ID].getNombre();
+}
+
+void Cuenta::crearTarea(const int& ID) {
+
+}
+
+int Cuenta::getCantTareas(const int& ID) {
+	return listas[ID].getCantTareas();
 }
 
 #endif

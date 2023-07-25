@@ -14,6 +14,7 @@ class Lista {
 	public:
 		Lista(const string);
 		string getNombre();
+		int getCantTareas();
 };
 
 Lista::Lista(const string nombre) {
@@ -22,6 +23,10 @@ Lista::Lista(const string nombre) {
 
 string Lista::getNombre() {
 	return nombre;
+}
+
+int Lista::getCantTareas() {
+	return tareas.size();
 }
 
 #endif

@@ -6,29 +6,46 @@
 #include <algorithm>
 #include <cctype>
 #include <vector>
+#include <stdexcept>
 using namespace std;
 
 bool datoValido(const string& cadena) {
-    if (cadena.length() < 4) {
+    if (cadena.size() < 4 || cadena.size() > 30) {
         return false;
     }
-    bool soloEspacios = all_of(cadena.begin(), cadena.end(), [](char c) {
-        return isspace(static_cast<unsigned char>(c));
-    });
+
+    bool soloEspacios = true;
+    for (char caracter : cadena) {
+        if (caracter != ' ') {
+            soloEspacios = false;
+            break;
+        }
+    }
+
     if (soloEspacios) {
         return false;
     }
+
     return true;
 }
 
 bool convertirStringInt(const string& cadena, int& numero) {
+    if (cadena.size() > 9) {
+        return false;
+    }
+
     for (char caracter : cadena) {
         if (!isdigit(caracter)) {
             return false;
         }
     }
+
+    try {
+        numero = stoi(cadena);	
+    } catch (const exception& e) {
+		return false;
+    }
     
-    numero = stoi(cadena);
     return true;
 }
 
