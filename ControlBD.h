@@ -62,7 +62,6 @@ bool carpetaValida(const string& carpetaNom) {
 }
 
 // Le falta verificar si hay cuentas duplicadas para evitar almacenarlas
-// Falta eliminar las carpetas que no son validas
 void ActualizarBD() {
     const string data = "Data";
 
@@ -140,31 +139,9 @@ void actualizarCuentas(vector<Cuenta>& cuentas) {
     }
 }
 
-bool cambiarUsuarioBD(const string& usuario) {
+bool cambiarDatosCuentaBD(const string& usuario, const string& clave) {
     const string cuenta = "Cuenta.txt";
-    string clave;
-    vector<string> datos;
-    cargarVariables(cuenta, datos, 2);
-    clave = datos[1];
-    restablecerArchivo(cuenta);
-
-    if (!guardarVariable(cuenta, usuario)) {
-		return false;
-	}
-
-	if (!guardarVariable(cuenta, clave)) {
-		return false;
-	}
     
-    return true;
-}
-
-bool cambiarClaveBD(const string& clave) {
-    const string cuenta = "Cuenta.txt";
-    string usuario;
-    vector<string> datos;
-    cargarVariables(cuenta, datos, 2);
-    usuario = datos[0];
     restablecerArchivo(cuenta);
 
     if (!guardarVariable(cuenta, usuario)) {

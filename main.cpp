@@ -30,6 +30,7 @@ void crearLista(Cuenta&);
 void configuracionAvanzada(Cuenta&, const int&);
 void cambiarUsuario(Cuenta&, const int&);
 void cambiarClave(Cuenta&, const int&);
+void eliminarCuenta(Cuenta&, const int&);
 
 void interfazLista(Cuenta&, const int&);
 
@@ -168,9 +169,9 @@ bool salir(const string& opcion) {
 void iniciarSesion(vector<Cuenta>& cuentas) {
 	const int esc = 27, intentosMax = 3;
 	const string titulo = "Iniciar sesion";
+	string usuario, clave;
 	int intentos = 0, ID;
 	char tecla = 0;
-	string usuario, clave;
 	bool accesoConcedido = false;
 
 	while (tecla != esc && tecla != 'X' && tecla != 'x' && intentos < intentosMax && !accesoConcedido) {
@@ -217,6 +218,7 @@ void iniciarSesion(vector<Cuenta>& cuentas) {
 
 int getID(vector<Cuenta>& cuentas, const string& usuario) {
 	int ID = 0;
+	
 	for (auto& cuenta : cuentas) {
 		if (usuario == cuenta.getUsuario()) {
 			return ID;
@@ -443,7 +445,7 @@ void cambiarUsuario(Cuenta& cuenta, const int& ID) {
 		return;
 	}
 
-	if (!cambiarUsuarioBD(usuario)) {
+	if (!cambiarDatosCuentaBD(usuario, clave)) {
 		cout << "Ha ocurrido un error al intentar cambiar su nombre de usuario\n";
 		mensajeError(tecla);
 		return;
@@ -454,7 +456,7 @@ void cambiarUsuario(Cuenta& cuenta, const int& ID) {
 void cambiarClave(Cuenta& cuenta, const int& ID) {
 	const int esc = 27;
 	const string titulo = "Cambiar clave";
-	string usuario, clave, nuevaClave1, nuevaClave2;
+	string clave, claveAux;
 	bool cambioClave = false;
 	char tecla = 0;
 
@@ -470,31 +472,33 @@ void cambiarClave(Cuenta& cuenta, const int& ID) {
 		if (cuenta.credencialesCorrectas(cuenta.getUsuario(), clave)) {
 			encabezado(titulo);
 			cout << "\tIngrese su nueva clave: ";
-			getline(cin, nuevaClave1);
+			getline(cin, clave);
 			if (salir(clave)) {
 				return;
 			}
 
 			if (datoValido(clave)) {
 				cout << "\tVuelva a ingresar su nueva clave: ";
-				getline(cin, nuevaClave2);
-				if (salir(nuevaClave2)) {
+				getline(cin, claveAux);
+				if (salir(claveAux)) {
 					return;
 				}
 				
-				if (nuevaClave1 == nuevaClave2) {
+				if (clave == claveAux) {
 					encabezado(titulo);
 					cout << "\tSu clave ha sido cambiada correctamente!\n";
 					cargando();
 					cambioClave = true;
 					
 				} else {
-					cout << "\tLas claves no son iguales\n";
+					cout << "\n\tLas claves no coinciden\n";
 					mensajeError(tecla);
 				}
 
 			} else {
+				encabezado(titulo);
 				cout << "\tLa clave no puede tener menos de 4 o mas de 30 caracteres y tampoco ser solo espacios en blanco\n";
+				mensajeError(tecla);
 			}
 
 		} else {
@@ -508,12 +512,61 @@ void cambiarClave(Cuenta& cuenta, const int& ID) {
 		return;
 	}
 
-	if (!cambiarClaveBD(nuevaClave1)) {
+	if (!cambiarDatosCuentaBD(cuenta.getUsuario(), clave)) {
 		cout << "Ha ocurrido un error al intentar cambiar su clave\n";
 		mensajeError(tecla);
 		return;
 	}
-	cuenta.cambiarClave(nuevaClave1);
+	cuenta.cambiarClave(clave);
+}
+
+void eliminarCuenta(Cuenta& cuenta, const int& ID) {
+	const int esc = 27;
+	const string titulo = "Eliminar cuenta";
+	string clave, opcion;
+	char tecla;
+	bool accionConfirmada = false;
+
+	while (tecla != esc && tecla != 'X' && tecla != 'x' && !accionConfirmada) {
+		encabezado(titulo);
+		cout << "\tEs necesario confirmar su identidad antes de continuar\n\n";
+		cout << "\tIngrese su clave actual: ";
+		getline(cin, clave);
+		if (salir(clave)) {
+			return;
+		}
+
+		if (cuenta.credencialesCorrectas(cuenta.getUsuario(), clave)) {
+			cout << "\tSu cuenta sera eliminada permanentemente y no podra ser recuperada\n\n";
+			cout << "\tEsta seguro de continuar?\n\n";
+			cout << "\t[1]: Si, quiero eliminar mi cuenta\n";
+			cout << "\t[2]: No, quiero regresar\n";
+			getline(cin, opcion);
+			
+			if (opcion == "1") {
+				cout << "\tSu cuenta ha sido eliminada\n";
+				cout << "\tPresione cualquier tecla para continuar . . .";
+				getch();
+				accionConfirmada = true;
+			} else if (opcion == "2") {
+				cargando();
+				break;
+			} else if (!salir(opcion) && opcion != "") {
+				opcionInvalida();
+			}
+			
+		} else {
+			encabezado(titulo);
+			cout << "\tLa clave es incorrecta\n";
+			mensajeError(tecla);
+		}
+	}
+
+	if (!accionConfirmada) {
+		return;
+	}
+
+	// eliminarCuentaBD()
 }
 
 void interfazLista(Cuenta& cuenta, const int& listaID) {
