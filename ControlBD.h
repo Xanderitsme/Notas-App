@@ -80,7 +80,9 @@ void ActualizarBD() {
     vector<string> carpetas;
     vector<string> nombresInt;
     vector<string> nombresString;
-    int num, carpetasCant = carpetasCont(carpetas);
+    int num;
+    carpetasCont(carpetas);
+
     for (auto& carpetaNom : carpetas) {
         if (carpetaValida(carpetaNom)) {
             if (convertirStringInt(carpetaNom, num)) {
@@ -94,11 +96,14 @@ void ActualizarBD() {
         }
     }
 
-    ordenarVector(nombresInt);
     int ID = 0;
-    for (const auto& carpetaNom : nombresInt) {
-        cambiarNombreCarpeta(carpetaNom, to_string(ID));
-        ID++;
+
+    if (nombresInt.size() != 0) {
+        ordenarVector(nombresInt);    
+        for (const auto& carpetaNom : nombresInt) {
+            cambiarNombreCarpeta(carpetaNom, to_string(ID));
+            ID++;
+        }
     }
 
     for (const auto& carpetaNom : nombresString) {
@@ -121,19 +126,37 @@ bool cargarDatosCuenta(const string& carpetaNom, string& usuario, string& clave)
     volverCarpetaAnt();
     return true;
 }
-// Falta la actualización de nombres de las carpetas
+// Falta la actualización de nombres de las carpetas - creo que ya esta corregido
 void actualizarCuentas(vector<Cuenta>& cuentas) {
-    string usuario, clave;
     vector<string> carpetas;
-    int carpetasCant = carpetasCont(carpetas);
+    string usuario, clave;
+    int ID;
+    carpetasCont(carpetas);
+
+    while (cuentas.size() > 0) {
+        cuentas.erase(cuentas.begin());
+    }
+
+    if (carpetas.size() == 0) {
+        return;
+    }
+
     ordenarVector(carpetas);
     for (const auto& carpetaNom : carpetas) {
+        ID = cuentas.size();
         if (cargarDatosCuenta(carpetaNom, usuario, clave)) {
             if (!cuentaRegistrada(cuentas, usuario)) {
                 cuentas.push_back(Cuenta(usuario, clave));
+                if (carpetaNom != to_string(ID)) {
+                    cambiarNombreCarpeta(carpetaNom, to_string(ID));
+                }
+
+            } else {
+                eliminarCarpeta(carpetaNom);
             }
+
         } else {
-            cout << "no se pudieron cargar los datos de la cuenta " << carpetaNom << "\n";
+            cout << "\tno se pudieron cargar los datos de la cuenta " << carpetaNom << "\n";
             error();
         }
     }
@@ -190,6 +213,17 @@ bool registrarCuentaBD(const string& usuario, const string& clave, const int& ID
 	return true;
 }
 
+bool eliminarCuentaBD(const int& ID) {
+    volverCarpetaAnt();
+    if (!eliminarCarpeta(to_string(ID))) {
+        return false;
+    }
+
+    return true;
+}
+
+// Control de la BD para las listas
+
 bool cargarDatosLista(const string& carpetaNom, string& nombreLista) {
     if (!accederCarpeta(carpetaNom)) {
         return false;
@@ -208,7 +242,12 @@ void actualizarListas(Cuenta& cuenta) {
     cuenta.eliminarListas();
     string nombreLista;
     vector<string> carpetas;
-    int carpetasCant = carpetasCont(carpetas);
+    carpetasCont(carpetas);
+
+    if (carpetas.size() == 0) {
+        return;
+    }
+
     ordenarVector(carpetas);
     for (const auto& carpetaNom : carpetas) {
         if (cargarDatosLista(carpetaNom, nombreLista)) {

@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <conio.h>
+#include <stdexcept>
 
 #include "Carpetas.h"
 #include "Archivos.h"
@@ -27,10 +28,10 @@ bool usuarioValidoCambio(const string&, const int&);
 
 void interfazCuenta(Cuenta&, const int&);
 void crearLista(Cuenta&);
-void configuracionAvanzada(Cuenta&, const int&);
+bool configuracionAvanzada(Cuenta&, const int&);
 void cambiarUsuario(Cuenta&, const int&);
 void cambiarClave(Cuenta&, const int&);
-void eliminarCuenta(Cuenta&, const int&);
+bool eliminarCuenta(Cuenta&, const int&);
 
 void interfazLista(Cuenta&, const int&);
 
@@ -57,7 +58,7 @@ int main() {
 		} else if (opcion == 'S' || opcion == 's') {
 			registrarse(cuentas);
 
-		} else if (opcion != 'X' && opcion != 'x' && opcion != esc) {
+		} else if (opcion != 'X' && opcion != 'x' && opcion != esc && opcion != 10 && opcion != 13) {
 			opcionInvalida();
 		}
 	}
@@ -316,7 +317,7 @@ bool usuarioValidoCambio(const string& usuario, const int& ID) {
 
 void interfazCuenta(Cuenta& cuenta, const int& ID) {
 	if (!accederCarpeta(to_string(ID))) {
-		cout << "Ha ocurrido un error al intentar acceder a su cuenta, por favor vuelva a intentarlo\n";
+		cout << "\tHa ocurrido un error al intentar acceder a su cuenta, por favor vuelva a intentarlo\n";
 		cargando();
 		return;
 	}
@@ -350,7 +351,9 @@ void interfazCuenta(Cuenta& cuenta, const int& ID) {
 		} else if (opcion == "S" || opcion == "s") {
 
 		} else if (opcion == "D" || opcion == "d") {
-			configuracionAvanzada(cuenta, ID);
+			if (configuracionAvanzada(cuenta, ID)) {
+				return;
+			}
 		} else if (!salir(opcion) && opcion != "") {
 			opcionInvalida();
 		}
@@ -372,12 +375,16 @@ void crearLista(Cuenta& cuenta) {
 	}
 
 	encabezado(titulo);
-	cout << "\tLa lista <" << nombreLista << "> se ha creado con exito!\n";
+	if (registrarListaBD(nombreLista, ID)) {
+		cout << "\tLa lista <" << nombreLista << "> se ha creado con exito!\n";
+	} else {
+		cout << "\tOcurrio un error al intentar crear la lista\n";
+	}
+	
 	cargando();
-	registrarListaBD(nombreLista, ID);
 }
 
-void configuracionAvanzada(Cuenta& cuenta, const int& ID) {
+bool configuracionAvanzada(Cuenta& cuenta, const int& ID) {
 	const string titulo = "Configuracion avanzada";
 	string opcion;
 
@@ -396,11 +403,15 @@ void configuracionAvanzada(Cuenta& cuenta, const int& ID) {
 		} else if (opcion == "S" || opcion == "s") {
 			cambiarClave(cuenta, ID); 
 		} else if (opcion == "D" || opcion == "d") {
-			
+			if (eliminarCuenta(cuenta, ID)) {
+				return true;
+			}
 		} else if (!salir(opcion) && opcion != "") {
 			opcionInvalida();
 		}
 	}
+
+	return false;
 }
 
 void cambiarUsuario(Cuenta& cuenta, const int& ID) {
@@ -446,7 +457,7 @@ void cambiarUsuario(Cuenta& cuenta, const int& ID) {
 	}
 
 	if (!cambiarDatosCuentaBD(usuario, clave)) {
-		cout << "Ha ocurrido un error al intentar cambiar su nombre de usuario\n";
+		cout << "\tHa ocurrido un error al intentar cambiar su nombre de usuario\n";
 		mensajeError(tecla);
 		return;
 	}
@@ -513,48 +524,52 @@ void cambiarClave(Cuenta& cuenta, const int& ID) {
 	}
 
 	if (!cambiarDatosCuentaBD(cuenta.getUsuario(), clave)) {
-		cout << "Ha ocurrido un error al intentar cambiar su clave\n";
+		cout << "\tHa ocurrido un error al intentar cambiar su clave\n";
 		mensajeError(tecla);
 		return;
 	}
 	cuenta.cambiarClave(clave);
 }
 
-void eliminarCuenta(Cuenta& cuenta, const int& ID) {
+bool eliminarCuenta(Cuenta& cuenta, const int& ID) {
 	const int esc = 27;
 	const string titulo = "Eliminar cuenta";
 	string clave, opcion;
-	char tecla;
 	bool accionConfirmada = false;
+	char tecla = 0;
 
 	while (tecla != esc && tecla != 'X' && tecla != 'x' && !accionConfirmada) {
 		encabezado(titulo);
-		cout << "\tEs necesario confirmar su identidad antes de continuar\n\n";
-		cout << "\tIngrese su clave actual: ";
+		cout << "\tAntes de continuar es necesario confirmar su identidad\n\n";
+		cout << "\tIngrese su clave: ";
 		getline(cin, clave);
 		if (salir(clave)) {
-			return;
+			return false;
 		}
 
 		if (cuenta.credencialesCorrectas(cuenta.getUsuario(), clave)) {
+			encabezado(titulo);
 			cout << "\tSu cuenta sera eliminada permanentemente y no podra ser recuperada\n\n";
-			cout << "\tEsta seguro de continuar?\n\n";
-			cout << "\t[1]: Si, quiero eliminar mi cuenta\n";
-			cout << "\t[2]: No, quiero regresar\n";
+			cout << "\tQuiere eliminar su cuenta?\n\n";
+			cout << "\t[A]: Si, quiero eliminar mi cuenta\n";
+			cout << "\t[X]: No, no queria hacer esto\n";
+			cout << "\t-> ";
 			getline(cin, opcion);
-			
-			if (opcion == "1") {
-				cout << "\tSu cuenta ha sido eliminada\n";
-				cout << "\tPresione cualquier tecla para continuar . . .";
-				getch();
+
+			if (opcion == "A" || opcion == "a") {
+				encabezado(titulo);
+				cout << "\tSu cuenta esta siendo eliminada\n\n";
+				cargando();
 				accionConfirmada = true;
-			} else if (opcion == "2") {
+			} else if (opcion == "X" || opcion == "x") {
+				encabezado(titulo);
+				cout << "\tLa accion ha sido cancelada\n";
 				cargando();
 				break;
 			} else if (!salir(opcion) && opcion != "") {
 				opcionInvalida();
 			}
-			
+
 		} else {
 			encabezado(titulo);
 			cout << "\tLa clave es incorrecta\n";
@@ -563,15 +578,21 @@ void eliminarCuenta(Cuenta& cuenta, const int& ID) {
 	}
 
 	if (!accionConfirmada) {
-		return;
+		return false;
 	}
 
-	// eliminarCuentaBD()
+	if (!eliminarCuentaBD(ID)) {
+		cout << "\tHubo un error al intentar eliminar su cuenta...\n";
+		cargando();
+		return false;
+	}
+
+	return true;
 }
 
 void interfazLista(Cuenta& cuenta, const int& listaID) {
 	if (!accederCarpeta(to_string(listaID))) {
-		cout << "Ha ocurrido un error al intentar acceder a la lista, por favor vuelva a intentarlo\n";
+		cout << "\tHa ocurrido un error al intentar acceder a la lista, por favor vuelva a intentarlo\n";
 		cargando();
 		return;
 	}

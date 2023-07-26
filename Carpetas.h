@@ -80,8 +80,8 @@ bool eliminarCarpeta(const string& nombre) {
         }
 
         vector<string> carpetas;
-        int carpetasCant = carpetasCont(carpetas);
-        carpetasCant = carpetasCont(carpetas);
+        carpetasCont(carpetas);
+        
         for (const auto& carpetaNom : carpetas) {
             eliminarCarpeta(carpetaNom);
         }
