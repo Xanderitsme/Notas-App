@@ -93,16 +93,16 @@ int Cuenta::getCantListas() {
 	return listas.size();
 }
 
-string Cuenta::getNombreLista(const int& ID) {
-	return listas[ID].getNombre();
+string Cuenta::getNombreLista(const int& listaID) {
+	return listas[listaID].getNombre();
 }
 
-void Cuenta::crearTarea(const int& ID) {
+void Cuenta::crearTarea(const int& listaID) {
 
 }
 
-int Cuenta::getCantTareas(const int& ID) {
-	return listas[ID].getCantTareas();
+int Cuenta::getCantTareas(const int& listaID) {
+	return listas[listaID].getCantTareas();
 }
 
 #endif

@@ -27,6 +27,7 @@ class Cuenta;
 bool cuentaRegistrada(vector<Cuenta>&, const string&);
 
 void error() {
+    system("cls");
     cout << "\tHa ocurrido un error al intentar cargar la base de datos\n";
     cout << "\tPruebe a volver a iniciar el programa\n\n";
     system("pause");
@@ -126,20 +127,20 @@ bool cargarDatosCuenta(const string& carpetaNom, string& usuario, string& clave)
     volverCarpetaAnt();
     return true;
 }
-// Falta la actualización de nombres de las carpetas - creo que ya esta corregido
+// No se esta llevando un control adecuado de las carpetas con nombre no numerico
 void actualizarCuentas(vector<Cuenta>& cuentas) {
-    vector<string> carpetas;
-    string usuario, clave;
-    int ID;
-    carpetasCont(carpetas);
-
     while (cuentas.size() > 0) {
         cuentas.erase(cuentas.begin());
     }
 
+    vector<string> carpetas;
+    carpetasCont(carpetas);
     if (carpetas.size() == 0) {
         return;
     }
+
+    string usuario, clave;
+    int ID;
 
     ordenarVector(carpetas);
     for (const auto& carpetaNom : carpetas) {
@@ -156,7 +157,6 @@ void actualizarCuentas(vector<Cuenta>& cuentas) {
             }
 
         } else {
-            cout << "\tno se pudieron cargar los datos de la cuenta " << carpetaNom << "\n";
             error();
         }
     }
@@ -237,23 +237,30 @@ bool cargarDatosLista(const string& carpetaNom, string& nombreLista) {
     volverCarpetaAnt();
     return true;
 }
-
+// No se esta llevando un control adecuado de las carpetas con nombre no numerico
 void actualizarListas(Cuenta& cuenta) {
     cuenta.eliminarListas();
-    string nombreLista;
+
     vector<string> carpetas;
     carpetasCont(carpetas);
-
     if (carpetas.size() == 0) {
         return;
     }
 
+    string nombreLista;
+    int ID;
+
     ordenarVector(carpetas);
     for (const auto& carpetaNom : carpetas) {
+        ID = cuenta.getCantListas();
         if (cargarDatosLista(carpetaNom, nombreLista)) {
             cuenta.crearLista(nombreLista);
+            if (carpetaNom != to_string(ID)) {
+                cambiarNombreCarpeta(carpetaNom, to_string(ID));
+            }
+
         } else {
-            // error();
+            error();
         }
     }
 }
@@ -275,6 +282,15 @@ bool registrarListaBD(const string& nombreLista, const int& ID) {
 
 bool registrarTareaBD(const string& contenido, const int& ID) {
     return false;
+}
+
+bool eliminarListaBD(const int& listaID) {
+    volverCarpetaAnt();
+    if (!eliminarCarpeta(to_string(listaID))) {
+        return false;
+    }
+
+    return true;
 }
 
 #endif

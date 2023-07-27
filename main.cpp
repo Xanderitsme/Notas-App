@@ -34,6 +34,7 @@ void cambiarClave(Cuenta&, const int&);
 bool eliminarCuenta(Cuenta&, const int&);
 
 void interfazLista(Cuenta&, const int&);
+bool eliminarLista(Cuenta&, const int&);
 
 int main() {
 	system("color 07");
@@ -461,6 +462,7 @@ void cambiarUsuario(Cuenta& cuenta, const int& ID) {
 		mensajeError(tecla);
 		return;
 	}
+
 	cuenta.cambiarUsuario(usuario);
 }
 
@@ -528,6 +530,7 @@ void cambiarClave(Cuenta& cuenta, const int& ID) {
 		mensajeError(tecla);
 		return;
 	}
+
 	cuenta.cambiarClave(clave);
 }
 
@@ -535,10 +538,10 @@ bool eliminarCuenta(Cuenta& cuenta, const int& ID) {
 	const int esc = 27;
 	const string titulo = "Eliminar cuenta";
 	string clave, opcion;
-	bool accionConfirmada = false;
+	bool accesoConcedido = false, accionConfirmada = false;
 	char tecla = 0;
 
-	while (tecla != esc && tecla != 'X' && tecla != 'x' && !accionConfirmada) {
+	while (tecla != esc && tecla != 'X' && tecla != 'x' && !accesoConcedido) {
 		encabezado(titulo);
 		cout << "\tAntes de continuar es necesario confirmar su identidad\n\n";
 		cout << "\tIngrese su clave: ";
@@ -548,28 +551,7 @@ bool eliminarCuenta(Cuenta& cuenta, const int& ID) {
 		}
 
 		if (cuenta.credencialesCorrectas(cuenta.getUsuario(), clave)) {
-			encabezado(titulo);
-			cout << "\tSu cuenta sera eliminada permanentemente y no podra ser recuperada\n\n";
-			cout << "\tQuiere eliminar su cuenta?\n\n";
-			cout << "\t[A]: Si, quiero eliminar mi cuenta\n";
-			cout << "\t[X]: No, no queria hacer esto\n";
-			cout << "\t-> ";
-			getline(cin, opcion);
-
-			if (opcion == "A" || opcion == "a") {
-				encabezado(titulo);
-				cout << "\tSu cuenta esta siendo eliminada\n\n";
-				cargando();
-				accionConfirmada = true;
-			} else if (opcion == "X" || opcion == "x") {
-				encabezado(titulo);
-				cout << "\tLa accion ha sido cancelada\n";
-				cargando();
-				break;
-			} else if (!salir(opcion) && opcion != "") {
-				opcionInvalida();
-			}
-
+			accesoConcedido = true;
 		} else {
 			encabezado(titulo);
 			cout << "\tLa clave es incorrecta\n";
@@ -577,16 +559,41 @@ bool eliminarCuenta(Cuenta& cuenta, const int& ID) {
 		}
 	}
 
-	if (!accionConfirmada) {
+	if (!accesoConcedido) {
 		return false;
 	}
 
-	if (!eliminarCuentaBD(ID)) {
-		cout << "\tHubo un error al intentar eliminar su cuenta...\n";
+	while (opcion != "X" && opcion != "x" && !accionConfirmada) {
+		encabezado(titulo);
+		cout << "\tSu cuenta sera eliminada permanentemente y no podra ser recuperada\n\n";
+		cout << "\tQuiere eliminar su cuenta?\n\n";
+		cout << "\t[A]: Si, quiero eliminar mi cuenta\n";
+		cout << "\t[X]: No, no queria hacer esto\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (opcion == "A" || opcion == "a") {
+			accionConfirmada = true;
+		} else if (!salir(opcion) && opcion != "") {
+			opcionInvalida();
+		}
+	}
+
+	if (!accionConfirmada) {
+		encabezado(titulo);
+		cout << "\tLa accion ha sido cancelada\n";
 		cargando();
 		return false;
 	}
 
+	encabezado(titulo);
+	if (!eliminarCuentaBD(ID)) {
+		cout << "\tHubo un error al intentar eliminar su cuenta...\n";
+		return false;
+	}
+
+	cout << "\tSu cuenta ha sido eliminada\n";
+	cargando();
 	return true;
 }
 
@@ -621,11 +628,50 @@ void interfazLista(Cuenta& cuenta, const int& listaID) {
 		} else if (opcion == "S" || opcion == "s") {
 
 		} else if (opcion == "D" || opcion == "d") {
-
+			if (eliminarLista(cuenta, listaID)) {
+				return;
+			}
 		} else if (!salir(opcion) && opcion != "") {
 			opcionInvalida();
 		}
 	}
 
 	volverCarpetaAnt();
+}
+
+bool eliminarLista(Cuenta& cuenta, const int& listaID) {
+	const int esc = 27;
+	const string titulo = "Eliminar lista";
+	string opcion;
+	bool accionConfirmada = false;
+
+	while (opcion != "X" && opcion != "x" && !accionConfirmada) {
+		encabezado(titulo);
+		cout << "\tLa lista <" << cuenta.getNombreLista(listaID) << "> sera eliminada permanentemente\n\n";
+		cout << "\tEliminar esta lista?\n\n";
+		cout << "\t[A]: Si, quiero eliminar esta lista\n";
+		cout << "\t[X]: No, no queria hacer esto\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (opcion == "A" || opcion == "a") {
+			accionConfirmada = true;
+		} else if (!salir(opcion) && opcion != "") {
+			opcionInvalida();
+		}
+	}
+
+	if (!accionConfirmada) {
+		return false;
+	}
+
+	encabezado(titulo);
+	if (!eliminarListaBD(listaID)) {
+		cout << "\tHubo un error al intentar eliminar la lista...\n";
+		return false;
+	}
+
+	cout << "\tLa lista ha sido eliminada\n";
+	cargando();
+	return true;
 }
