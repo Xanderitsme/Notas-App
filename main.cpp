@@ -28,12 +28,14 @@ bool usuarioValidoCambio(const string&, const int&);
 
 void interfazCuenta(Cuenta&, const int&);
 void crearLista(Cuenta&);
+// void combinarListas();
 bool configuracionAvanzada(Cuenta&, const int&);
 void cambiarUsuario(Cuenta&, const int&);
 void cambiarClave(Cuenta&, const int&);
 bool eliminarCuenta(Cuenta&, const int&);
 
 void interfazLista(Cuenta&, const int&);
+void crearTarea(Cuenta&, const int&);
 bool eliminarLista(Cuenta&, const int&);
 
 int main() {
@@ -329,8 +331,8 @@ void interfazCuenta(Cuenta& cuenta, const int& ID) {
 	while (opcion != "X" && opcion != "x") {
 		actualizarListas(cuenta);
 		encabezado(cuenta.getUsuario());
-		cout << "\tBienvenido! <" << cuenta.getUsuario() << ">, es un gusto tenerlo aqui nuevamente.\n";
-		cout << "\tEscriba el numero de alguna lista para acceder o la letra de cualquiera de las opciones.\n\n";
+		cout << "\tBienvenido! <" << cuenta.getUsuario() << ">, es un gusto tenerlo aqui nuevamente\n";
+		cout << "\tEscriba el numero de alguna lista para acceder o la letra de cualquiera de las opciones\n\n";
 
 		if (cuenta.getCantListas() == 0) {
 			cout << "\tActualmente no tiene ninguna lista creada!\n";
@@ -364,8 +366,8 @@ void interfazCuenta(Cuenta& cuenta, const int& ID) {
 }
 
 void crearLista(Cuenta& cuenta) {
-	const int ID = cuenta.getCantListas();
-	const string titulo;
+	const int listaID = cuenta.getCantListas();
+	const string titulo = "Crear lista";
 	string nombreLista;
 
 	encabezado(titulo);
@@ -376,10 +378,10 @@ void crearLista(Cuenta& cuenta) {
 	}
 
 	encabezado(titulo);
-	if (registrarListaBD(nombreLista, ID)) {
+	if (registrarListaBD(nombreLista, listaID)) {
 		cout << "\tLa lista <" << nombreLista << "> se ha creado con exito!\n";
 	} else {
-		cout << "\tOcurrio un error al intentar crear la lista\n";
+		cout << "\tHa ocurrido un error al intentar crear la lista\n";
 	}
 	
 	cargando();
@@ -391,7 +393,7 @@ bool configuracionAvanzada(Cuenta& cuenta, const int& ID) {
 
 	while (opcion != "X" && opcion != "x") {
 		encabezado(titulo);
-		cout << "\tEscriba la letra de la opcion que desee. \n\n";
+		cout << "\tEscriba la letra de la opcion que desee\n\n";
 		cout << "\t[A]: Cambiar nombre de usuario\n";
 		cout << "\t[S]: Cambiar clave\n";
 		cout << "\t[D]: Eliminar cuenta\n";
@@ -606,37 +608,69 @@ void interfazLista(Cuenta& cuenta, const int& listaID) {
 
 	const string titulo = "Ver lista";
 	string opcion;
+	int tareaID = 0;
 
 	while (opcion != "X" && opcion != "x") {
-		// actualizarTareas();
+		actualizarTareas(cuenta, listaID);
 		encabezado(titulo);
 		cout << "\tMostrado la lista <" << cuenta.getNombreLista(listaID) << ">\n";
-		cout << "\tEscriba el numero de alguna tarea para ver mas opciones, o la letra de cualquiera de las opciones\n";
+		cout << "\tEscriba el numero de alguna tarea para ver mas opciones, o la letra de cualquiera de las opciones\n\n";
 
-		// 
+		if (cuenta.getCantTareas(listaID) == 0) {
+			cout << "\tActualmente esta lista esta vacia!\n";
+		}
+		cuenta.mostrarTareas(listaID);
 
 		separador();
-		cout << "\t[A]: Cambiar nombre\n";
+		cout << "\t[A]: Crear una tarea\n";
 		cout << "\t[S]: Vaciar lista\n";
 		cout << "\t[D]: Eliminar lista\n";
+		cout << "\t[F]: Renombrar lista\n";
 		cout << "\t[X]: Volver\n";
 		cout << "\t-> ";
 		getline(cin, opcion);
 
-		if (opcion == "A" || opcion == "a") {
+		if (convertirStringInt(opcion, tareaID) && tareaID > 0 && tareaID <= cuenta.getCantTareas(listaID)) {
 
+		} else if (opcion == "A" || opcion == "a") {
+			crearTarea(cuenta, listaID);
 		} else if (opcion == "S" || opcion == "s") {
 
 		} else if (opcion == "D" || opcion == "d") {
 			if (eliminarLista(cuenta, listaID)) {
 				return;
 			}
+		} else if (opcion == "F" || opcion == "f") {
+
 		} else if (!salir(opcion) && opcion != "") {
 			opcionInvalida();
 		}
 	}
 
 	volverCarpetaAnt();
+}
+
+void crearTarea(Cuenta& cuenta, const int& listaID) {
+	const int tareaID = cuenta.getCantTareas(listaID);
+	const string titulo = "Crear tarea";
+	string descripcion;
+
+	encabezado(titulo);
+	cout << "\tEscriba la descripcion de esta tarea:\n\n";
+	cout << "\t";
+	getline(cin, descripcion);
+	if (salir(descripcion)) {
+		return;
+	}
+
+	encabezado(titulo);
+	if (registrarTareaBD(descripcion, tareaID)) {
+		cout << "\tLa tarea se ha creado con exito!\n";
+	} else {
+		cout << "\tHa ocurrido un error al intentar crear la tarea\n";
+	}
+
+	cargando();
 }
 
 bool eliminarLista(Cuenta& cuenta, const int& listaID) {

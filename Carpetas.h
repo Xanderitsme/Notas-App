@@ -19,7 +19,7 @@
 using namespace std;
 namespace fs = filesystem;
 
-//FUNCIONES PARA MANIPULAR CARPETAS Y DIRECTORIOS
+// Funciones para manipular carpetas y directorios
 
 bool crearCarpeta(const string& nombre) {
     if (mkdir(nombre.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0) {
@@ -38,8 +38,10 @@ bool accederCarpeta(const string& nombre) {
 void volverCarpetaAnt() {
     chdir("..");
 }
-
-bool cambiarNombreCarpeta(const string& nombreActual, const string& nombreNuevo) {
+// Modifica los nombres de las carpetas o archivos
+// Primer parametro: Nombre actual
+// Segundo parametro: Nuevo nombre
+bool cambiarNombreAC(const string& nombreActual, const string& nombreNuevo) {
     try {
         fs::rename(nombreActual, nombreNuevo);
     } catch (const fs::filesystem_error& e) {

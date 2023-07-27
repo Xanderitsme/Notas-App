@@ -49,6 +49,34 @@ bool convertirStringInt(const string& cadena, int& numero) {
     return true;
 }
 
+void recortarExtension(vector<string>& cadenas) {
+    int indice;
+    bool recortar;
+
+    for (auto& cadena : cadenas) {
+        indice = 0;
+        recortar = false;
+        for (char caracter : cadena) {
+            if (caracter == '.') {
+                recortar = true;
+                break;
+            }
+            indice++;
+        }
+
+        if (recortar) {
+            cadena = cadena.substr(0, indice);
+        }
+    }
+}
+
+void agregarExtensionTXT(vector<string>& cadenas) {
+    const string extension = ".txt";
+    for (auto& cadena : cadenas) {
+        cadena+= extension;
+    }
+}
+
 void ordenarVector(vector<string>& cadenas) {
     vector<int> numeros;
     int aux;

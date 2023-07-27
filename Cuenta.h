@@ -19,13 +19,14 @@ class Cuenta {
 		void cambiarClave(const string&);
 
 		void crearLista(const string&);
-		void eliminarLista(const int&);
 		void eliminarListas();
 		void mostrarListas();
 		int getCantListas();
-		
 		string getNombreLista(const int&);
-		void crearTarea(const int&);
+		
+		void crearTarea(const int&, const string&);
+		void eliminarTareas(const int&);
+		void mostrarTareas(const int&);
 		int getCantTareas(const int&);
 };
 
@@ -59,10 +60,6 @@ void Cuenta::crearLista(const string& nombreLista) {
 	listas.push_back(Lista(nombreLista));
 }
 
-void Cuenta::eliminarLista(const int& ID) {
-
-}
-
 void Cuenta::eliminarListas() {
 	while(listas.size() > 0) {
 		listas.erase(listas.begin());
@@ -71,9 +68,10 @@ void Cuenta::eliminarListas() {
 
 void Cuenta::mostrarListas() {
 	const string fin = "...";
-	const int limiteNombre = 40;
+	const int limiteNombre = 70;
 	int indice = 1;
 	string nombreRecortado;
+
 	for (auto& lista : listas) {
 		cout << "\t[" << indice << "]: <";
 
@@ -97,8 +95,16 @@ string Cuenta::getNombreLista(const int& listaID) {
 	return listas[listaID].getNombre();
 }
 
-void Cuenta::crearTarea(const int& listaID) {
+void Cuenta::crearTarea(const int& listaID, const string& descripcion) {
+	listas[listaID].crearTarea(descripcion);
+}
 
+void Cuenta::eliminarTareas(const int& listaID) {
+	listas[listaID].eliminarTareas();
+}
+
+void Cuenta::mostrarTareas(const int& listaID) {
+	listas[listaID].mostrarTareas();
 }
 
 int Cuenta::getCantTareas(const int& listaID) {

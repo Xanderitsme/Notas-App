@@ -6,22 +6,21 @@ using namespace std;
 
 class Tarea {
 	private:
-		string descripcion; 
-		bool cumplida; 
-		chrono::system_clock::time_point inicio; 
-		chrono::system_clock::time_point limite; 
+		string descripcion;
+		bool cumplida;
+
 	public:
-		Tarea(const string);
+		Tarea(const string&);
 		string getDescripcion();
 };
 
-Tarea::Tarea(const string descripcion) {
-	this->descripcion = descripcion; 
-	cumplida = false; 
-	chrono::system_clock::time_point inicio = std::chrono::system_clock::now();
+Tarea::Tarea(const string& descripcion) {
+	this->descripcion = descripcion;
+	cumplida = false;
 }
 
 string Tarea::getDescripcion(){
 	return descripcion;
 }
+
 #endif

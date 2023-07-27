@@ -10,7 +10,7 @@ int carpetasCont(vector<string>&);
 bool existeCarpeta(const string&);
 bool crearCarpeta(const string &);
 bool accederCarpeta(const string&);
-bool cambiarNombreCarpeta(const string&, const string&);
+bool cambiarNombreAC(const string&, const string&);
 void volverCarpetaAnt();
 
 bool existeArchivo(const string&);
@@ -62,7 +62,6 @@ bool carpetaValida(const string& carpetaNom) {
     return true;
 }
 
-// Le falta verificar si hay cuentas duplicadas para evitar almacenarlas
 void ActualizarBD() {
     const string data = "Data";
 
@@ -84,7 +83,7 @@ void ActualizarBD() {
     int num;
     carpetasCont(carpetas);
 
-    for (auto& carpetaNom : carpetas) {
+    for (const auto& carpetaNom : carpetas) {
         if (carpetaValida(carpetaNom)) {
             if (convertirStringInt(carpetaNom, num)) {
                 nombresInt.push_back(carpetaNom);
@@ -102,16 +101,18 @@ void ActualizarBD() {
     if (nombresInt.size() != 0) {
         ordenarVector(nombresInt);    
         for (const auto& carpetaNom : nombresInt) {
-            cambiarNombreCarpeta(carpetaNom, to_string(ID));
+            cambiarNombreAC(carpetaNom, to_string(ID));
             ID++;
         }
     }
 
     for (const auto& carpetaNom : nombresString) {
-        cambiarNombreCarpeta(carpetaNom, to_string(ID));
+        cambiarNombreAC(carpetaNom, to_string(ID));
         ID++;
     }
 }
+
+// Control de la BD para las cuentas
 
 bool cargarDatosCuenta(const string& carpetaNom, string& usuario, string& clave) {
     if (!accederCarpeta(carpetaNom)) {
@@ -149,7 +150,7 @@ void actualizarCuentas(vector<Cuenta>& cuentas) {
             if (!cuentaRegistrada(cuentas, usuario)) {
                 cuentas.push_back(Cuenta(usuario, clave));
                 if (carpetaNom != to_string(ID)) {
-                    cambiarNombreCarpeta(carpetaNom, to_string(ID));
+                    cambiarNombreAC(carpetaNom, to_string(ID));
                 }
 
             } else {
@@ -248,15 +249,15 @@ void actualizarListas(Cuenta& cuenta) {
     }
 
     string nombreLista;
-    int ID;
+    int listaID;
 
     ordenarVector(carpetas);
     for (const auto& carpetaNom : carpetas) {
-        ID = cuenta.getCantListas();
+        listaID = cuenta.getCantListas();
         if (cargarDatosLista(carpetaNom, nombreLista)) {
             cuenta.crearLista(nombreLista);
-            if (carpetaNom != to_string(ID)) {
-                cambiarNombreCarpeta(carpetaNom, to_string(ID));
+            if (carpetaNom != to_string(listaID)) {
+                cambiarNombreAC(carpetaNom, to_string(listaID));
             }
 
         } else {
@@ -265,10 +266,10 @@ void actualizarListas(Cuenta& cuenta) {
     }
 }
 
-bool registrarListaBD(const string& nombreLista, const int& ID) {
+bool registrarListaBD(const string& nombreLista, const int& listaID) {
     const string lista = "Lista.txt";
 
-    if (!registroGeneral(lista, ID)) {
+    if (!registroGeneral(lista, listaID)) {
         return false;
     }
 
@@ -280,16 +281,78 @@ bool registrarListaBD(const string& nombreLista, const int& ID) {
 	return true;
 }
 
-bool registrarTareaBD(const string& contenido, const int& ID) {
-    return false;
-}
-
 bool eliminarListaBD(const int& listaID) {
     volverCarpetaAnt();
     if (!eliminarCarpeta(to_string(listaID))) {
         return false;
     }
 
+    return true;
+}
+
+// Control de la BD para las tareas
+
+bool cargarDatosTarea(const string& archivoNom, string& descripcion) {
+    vector<string> datos;
+    cargarVariables(archivoNom, datos, 1);
+    descripcion = datos[0];
+
+    return true;
+}
+
+void estandarizarArchivos(vector<string>& archivos) {
+    const string lista = "Lista.txt";
+    int indice = 0;
+    for (const auto& archivoNom : archivos) {
+        if (archivoNom == lista) {
+            archivos.erase(archivos.begin() + indice);
+            break;
+        }
+        indice++;
+    }
+    recortarExtension(archivos);
+}
+// No se esta llevando un control adecuado de los archivos con nombre no numerico
+void actualizarTareas(Cuenta& cuenta, const int& listaID) {
+    cuenta.eliminarTareas(listaID);
+
+    vector<string> archivos;
+    archivosCont(archivos);
+    estandarizarArchivos(archivos);
+
+    if (archivos.size() == 0) {
+        return;
+    }
+
+    ordenarVector(archivos);
+    agregarExtensionTXT(archivos);
+
+    const string extension = ".txt";
+    string descripcion;
+    int tareaID;
+
+    for (const auto& archivoNom : archivos) {
+        tareaID = cuenta.getCantTareas(listaID);
+        if (cargarDatosTarea(archivoNom, descripcion)) {
+            cuenta.crearTarea(listaID, descripcion);
+            if (archivoNom != to_string(tareaID) + extension) {
+                cambiarNombreAC(archivoNom, to_string(tareaID) + extension);
+            }
+        } else {
+            // error();
+        }
+    }
+}
+
+bool registrarTareaBD(const string& descripcion, const int& tareaID) {
+    if (!crearArchivo(to_string(tareaID) + ".txt")) {
+        return false;
+    }
+
+    if (!guardarVariable(to_string(tareaID) + ".txt", descripcion)) {
+        return false;
+    }
+    
     return true;
 }
 
