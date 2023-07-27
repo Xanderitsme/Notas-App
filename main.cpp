@@ -4,19 +4,13 @@
 #include <conio.h>
 #include <stdexcept>
 
+#include "Mensajes.h"
 #include "Carpetas.h"
 #include "Archivos.h"
 #include "Cadenas.h"
 #include "Cuenta.h"
 #include "ControlBD.h"
 using namespace std;
-
-void encabezado(const string&);
-void separador();
-void mensajeError(char&);
-void opcionInvalida();
-void cargando();
-bool salir(const string&);
 
 void iniciarSesion(vector<Cuenta>&);
 int getID(vector<Cuenta>&, const string&);
@@ -37,6 +31,8 @@ bool eliminarCuenta(Cuenta&, const int&);
 void interfazLista(Cuenta&, const int&);
 void crearTarea(Cuenta&, const int&);
 bool eliminarLista(Cuenta&, const int&);
+
+void interfazTarea(Cuenta&, const int&, const int&);
 
 int main() {
 	system("color 07");
@@ -61,113 +57,12 @@ int main() {
 		} else if (opcion == 'S' || opcion == 's') {
 			registrarse(cuentas);
 
-		} else if (opcion != 'X' && opcion != 'x' && opcion != esc && opcion != 10 && opcion != 13) {
+		} else if (opcion != 'X' && opcion != 'x' && opcion != esc) {
 			opcionInvalida();
 		}
 	}
 
 	return 0;
-}
-
-void encabezado(const string& titulo) {
-    char upLeft = 201, horizontal = 205, upRigth = 187, vertical = 186, downLeft = 200, downRight = 188, diamond = 4, punto = 250, linea = 22;
-    string title = "Notas App", tituloMod = titulo;
-    const int styleLenght = 32, bordes = 10;
-
-	if (titulo.size() > styleLenght + title.size() - bordes) {
-		tituloMod = titulo.substr(0, styleLenght + title.size() - bordes - 1) + "...";
-	} else if (titulo.size() > 0){
-		tituloMod+= " ";
-	}
-
-    system("cls");
-	// Primera linea
-    cout << "\t" << upLeft;
-    for (int i = 0; i < (styleLenght + title.size()); i++) {
-        cout << horizontal;
-    }
-    cout << upRigth;
-
-    cout << "\t" << vertical << " Escriba X  " << vertical <<"\n";
-
-	// Segunda linea
-    cout << "\t" << vertical << "  " << diamond << "   <  < << ";
-    cout << punto << " " << title << " " << punto;
-    cout << " >> >  >   " << diamond << "  " << vertical;
-
-    cout << "\t" << vertical << " para salir " << vertical << "\n";
-
-    // Tercera linea
-    cout << "\t" << vertical << "  " << diamond << " ";
-
-	cout << tituloMod;
-	for (int i = 0; i < 24 + title.size() - tituloMod.size(); i++) {
-		cout << linea;
-	}
-
-    cout << " " << diamond << "  " << vertical;
-
-    cout << "\t" << vertical << " o volver   " << vertical << "\n";
-
-	// Cuarta linea
-    cout << "\t" << downLeft;
-    for (int i = 0; i < (styleLenght + title.size()); i++) {
-        cout << horizontal;
-    }
-    cout << downRight;
-
-    cout << "\t" << downLeft;
-    for (int i = 0; i < 12; i++) {
-        cout << horizontal;
-    }
-    cout << downRight << "\n\n";
-    
-	// Previsualizacion
-	//   ╔═════════════════════════════════════════╗    ║ Escriba X  ║
-	//   ║  ♦   <  < << · Notas App · >> >  >   ♦  ║    ║ para salir ║
-    //   ║  ♦ ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ♦  ║    ║ o volver   ║
-	//   ╚═════════════════════════════════════════╝    ╚════════════╝
-
-}
-
-void separador() {
-	const char linea = 22;
-	cout << "\n\t";
-	for (int i = 0; i < 45; i++) {
-		cout << linea << " ";
-	}
-	cout << "\n\n";
-}
-
-void mensajeError(char& tecla) {
-	cout << "\n\tPresione ESC si desea volver a la interfaz anterior\n";
-	cout << "\tPresione cualquier tecla para volver a intentarlo\n";
-	tecla = getch();
-}
-
-void opcionInvalida() {
-	encabezado("");
-	cout << "\tLa opcion seleccionada no existe, por favor vuelva a intentarlo\n\n";
-	cout << "\tPresione cualquier tecla para continuar . . .";
-	getch();
-}
-
-void cargando() {
-	cout << "\n\t\tCargando ";
-	Sleep(400);
-	cout << ". ";
-	Sleep(400);
-	cout << ". ";
-	Sleep(400);
-	cout << ". ";
-	Sleep(400);
-}
-
-bool salir(const string& opcion) {
-	if (opcion == "X" || opcion == "x") {
-		return true;
-	}
-	return false;
 }
 
 void iniciarSesion(vector<Cuenta>& cuentas) {
@@ -332,7 +227,7 @@ void interfazCuenta(Cuenta& cuenta, const int& ID) {
 		actualizarListas(cuenta);
 		encabezado(cuenta.getUsuario());
 		cout << "\tBienvenido! <" << cuenta.getUsuario() << ">, es un gusto tenerlo aqui nuevamente\n";
-		cout << "\tEscriba el numero de alguna lista para acceder o la letra de cualquiera de las opciones\n\n";
+		cout << "\tEscriba el numero de alguna lista para acceder a ella o la letra de cualquiera de las opciones\n\n";
 
 		if (cuenta.getCantListas() == 0) {
 			cout << "\tActualmente no tiene ninguna lista creada!\n";
@@ -357,7 +252,7 @@ void interfazCuenta(Cuenta& cuenta, const int& ID) {
 			if (configuracionAvanzada(cuenta, ID)) {
 				return;
 			}
-		} else if (!salir(opcion) && opcion != "") {
+		} else if (!salir(opcion)) {
 			opcionInvalida();
 		}
 	}
@@ -409,7 +304,7 @@ bool configuracionAvanzada(Cuenta& cuenta, const int& ID) {
 			if (eliminarCuenta(cuenta, ID)) {
 				return true;
 			}
-		} else if (!salir(opcion) && opcion != "") {
+		} else if (!salir(opcion)) {
 			opcionInvalida();
 		}
 	}
@@ -623,15 +518,15 @@ void interfazLista(Cuenta& cuenta, const int& listaID) {
 
 		separador();
 		cout << "\t[A]: Crear una tarea\n";
-		cout << "\t[S]: Vaciar lista\n";
+		cout << "\t[S]: Renombrar lista\n";
 		cout << "\t[D]: Eliminar lista\n";
-		cout << "\t[F]: Renombrar lista\n";
+		cout << "\t[F]: Vaciar lista\n";
 		cout << "\t[X]: Volver\n";
 		cout << "\t-> ";
 		getline(cin, opcion);
 
 		if (convertirStringInt(opcion, tareaID) && tareaID > 0 && tareaID <= cuenta.getCantTareas(listaID)) {
-
+			interfazTarea(cuenta, listaID, tareaID - 1);
 		} else if (opcion == "A" || opcion == "a") {
 			crearTarea(cuenta, listaID);
 		} else if (opcion == "S" || opcion == "s") {
@@ -642,7 +537,7 @@ void interfazLista(Cuenta& cuenta, const int& listaID) {
 			}
 		} else if (opcion == "F" || opcion == "f") {
 
-		} else if (!salir(opcion) && opcion != "") {
+		} else if (!salir(opcion)) {
 			opcionInvalida();
 		}
 	}
@@ -656,7 +551,8 @@ void crearTarea(Cuenta& cuenta, const int& listaID) {
 	string descripcion;
 
 	encabezado(titulo);
-	cout << "\tEscriba la descripcion de esta tarea:\n\n";
+	cout << "\tSe encuentra en la lista <" << cuenta.getNombreLista(listaID) << ">\n";
+	cout << "\tEscriba la descripcion para la nueva tarea:\n\n";
 	cout << "\t";
 	getline(cin, descripcion);
 	if (salir(descripcion)) {
@@ -690,7 +586,7 @@ bool eliminarLista(Cuenta& cuenta, const int& listaID) {
 
 		if (opcion == "A" || opcion == "a") {
 			accionConfirmada = true;
-		} else if (!salir(opcion) && opcion != "") {
+		} else if (!salir(opcion)) {
 			opcionInvalida();
 		}
 	}
@@ -708,4 +604,38 @@ bool eliminarLista(Cuenta& cuenta, const int& listaID) {
 	cout << "\tLa lista ha sido eliminada\n";
 	cargando();
 	return true;
+}
+
+void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
+	const string titulo = "Mostrando tarea";
+	string opcion;
+
+	while (opcion != "X" && opcion != "x") {
+		actualizarTareas(cuenta, listaID);
+		encabezado(titulo);
+		cout << "\tSe encuentra en la lista <" << cuenta.getNombreLista(listaID) << ">\n";
+		cout << "\tEscriba la letra de la opcion que desee\n\n";
+		cout << "\t<" << cuenta.getDescripcionTarea(listaID, tareaID) << ">\n";
+
+		separador();
+		cout << "\t[A]: Marcar como cumplida\n";
+		cout << "\t[S]: Editar tarea\n";
+		cout << "\t[D]: Eliminar tarea\n";
+		cout << "\t[F]: Transferir nota a otra lista\n";
+		cout << "\t[X]: Volver\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (opcion == "A" || opcion == "a") {
+
+		} else if (opcion == "S" || opcion == "s") {
+
+		} else if (opcion == "D" || opcion == "d") {
+
+		} else if (opcion == "F" || opcion == "f") {
+
+		} else if (!salir(opcion)) {
+			opcionInvalida();
+		}
+	}
 }

@@ -28,6 +28,7 @@ class Cuenta {
 		void eliminarTareas(const int&);
 		void mostrarTareas(const int&);
 		int getCantTareas(const int&);
+		string getDescripcionTarea(const int&, const int&);
 };
 
 Cuenta::Cuenta(const string& usuario, const string& clave) {
@@ -109,6 +110,10 @@ void Cuenta::mostrarTareas(const int& listaID) {
 
 int Cuenta::getCantTareas(const int& listaID) {
 	return listas[listaID].getCantTareas();
+}
+
+string Cuenta::getDescripcionTarea(const int& listaID, const int& tareaID) {
+	return listas[listaID].getDescripcionTarea(tareaID);
 }
 
 #endif
