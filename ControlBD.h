@@ -345,14 +345,26 @@ void actualizarTareas(Cuenta& cuenta, const int& listaID) {
 }
 
 bool registrarTareaBD(const string& descripcion, const int& tareaID) {
-    if (!crearArchivo(to_string(tareaID) + ".txt")) {
+    const string extension = ".txt";
+
+    if (!crearArchivo(to_string(tareaID) + extension)) {
         return false;
     }
 
-    if (!guardarVariable(to_string(tareaID) + ".txt", descripcion)) {
+    if (!guardarVariable(to_string(tareaID) + extension, descripcion)) {
         return false;
     }
     
+    return true;
+}
+
+bool eliminarTareaBD(const int& tareaID) {
+    const string extension = ".txt";
+
+    if (!eliminarArchivo(to_string(tareaID) + extension)) {
+        return false;
+    }
+
     return true;
 }
 

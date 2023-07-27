@@ -33,6 +33,7 @@ void crearTarea(Cuenta&, const int&);
 bool eliminarLista(Cuenta&, const int&);
 
 void interfazTarea(Cuenta&, const int&, const int&);
+bool eliminarTarea(Cuenta&, const int&, const int&);
 
 int main() {
 	system("color 07");
@@ -631,11 +632,51 @@ void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 		} else if (opcion == "S" || opcion == "s") {
 
 		} else if (opcion == "D" || opcion == "d") {
-
+			if (eliminarTarea(cuenta, listaID, tareaID)) {
+				return;
+			}
 		} else if (opcion == "F" || opcion == "f") {
 
 		} else if (!salir(opcion)) {
 			opcionInvalida();
 		}
 	}
+}
+
+bool eliminarTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
+	const int esc = 27;
+	const string titulo = "Eliminar nota";
+	string opcion;
+	bool accionConfirmada = false;
+
+	while (opcion != "X" && opcion != "x" && !accionConfirmada) {
+		encabezado(titulo);
+		cout << "\tEsta tarea sera eliminada:\n";
+		cout << "\t<" << cuenta.getDescripcionTarea(listaID, tareaID) << ">\n\n";
+		cout << "\tEliminar esta tarea?\n\n";
+		cout << "\t[A]: Si, quiero eliminar esta tarea\n";
+		cout << "\t[X]: No, no queria hacer esto\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (opcion == "A" || opcion == "a") {
+			accionConfirmada = true;
+		} else if (!salir(opcion)) {
+			opcionInvalida();
+		}
+	}
+
+	if (!accionConfirmada) {
+		return false;
+	}
+
+	encabezado(titulo);
+	if (!eliminarTareaBD(tareaID)) {
+		cout << "\tHubo un error al intentar eliminar la tarea...\n";
+		return false;
+	}
+
+	cout << "\tLa tarea ha sido eliminada\n";
+	cargando();
+	return true;
 }
