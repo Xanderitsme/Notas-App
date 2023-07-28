@@ -189,6 +189,7 @@ bool registroGeneral(const string& nombreArchivo, const int& ID) {
 	}
 
 	if (!crearArchivo(nombreArchivo)) {
+        volverCarpetaAnt();
 		return false;
 	}
 
@@ -203,10 +204,12 @@ bool registrarCuentaBD(const string& usuario, const string& clave, const int& ID
     }
 
 	if (!guardarVariable(cuenta, usuario)) {
+        volverCarpetaAnt();
 		return false;
 	}
 
 	if (!guardarVariable(cuenta, clave)) {
+        volverCarpetaAnt();
 		return false;
 	}
 	
@@ -266,6 +269,18 @@ void actualizarListas(Cuenta& cuenta) {
     }
 }
 
+bool cambiarDatosListaBD(const string& nombreLista, const int& listaID) {
+    const string lista = "Lista.txt";
+
+    restablecerArchivo(lista);
+
+    if (!guardarVariable(lista, nombreLista)) {
+		return false;
+	}
+
+	return true;
+}
+
 bool registrarListaBD(const string& nombreLista, const int& listaID) {
     const string lista = "Lista.txt";
 
@@ -274,6 +289,7 @@ bool registrarListaBD(const string& nombreLista, const int& listaID) {
     }
 
 	if (!guardarVariable(lista, nombreLista)) {
+        volverCarpetaAnt();
 		return false;
 	}
 
@@ -303,13 +319,16 @@ bool cargarDatosTarea(const string& archivoNom, string& descripcion) {
 void estandarizarArchivos(vector<string>& archivos) {
     const string lista = "Lista.txt";
     int indice = 0;
+
     for (const auto& archivoNom : archivos) {
         if (archivoNom == lista) {
             archivos.erase(archivos.begin() + indice);
             break;
         }
+
         indice++;
     }
+
     recortarExtension(archivos);
 }
 // No se esta llevando un control adecuado de los archivos con nombre no numerico

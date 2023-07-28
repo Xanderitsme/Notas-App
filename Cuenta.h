@@ -23,6 +23,7 @@ class Cuenta {
 		void mostrarListas();
 		int getCantListas();
 		string getNombreLista(const int&);
+		void renombrarLista(const string&, const int&);
 		
 		void crearTarea(const int&, const string&);
 		void eliminarTareas(const int&);
@@ -94,6 +95,10 @@ int Cuenta::getCantListas() {
 
 string Cuenta::getNombreLista(const int& listaID) {
 	return listas[listaID].getNombre();
+}
+
+void Cuenta::renombrarLista(const string& nombreLista, const int& listaID) {
+	listas[listaID].renombrarLista(nombreLista);
 }
 
 void Cuenta::crearTarea(const int& listaID, const string& descripcion) {

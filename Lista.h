@@ -8,12 +8,13 @@ using namespace std;
 
 class Lista {
 	private:
-		string nombre;
+		string nombreLista;
 		vector<Tarea> tareas;
 
 	public:
 		Lista(const string&);
 		string getNombre();
+		void renombrarLista(const string&);
 
 		void crearTarea(const string&);
 		void eliminarTareas();
@@ -22,12 +23,16 @@ class Lista {
 		string getDescripcionTarea(const int&);
 };
 
-Lista::Lista(const string& nombre) {
-	this->nombre = nombre;
+Lista::Lista(const string& nombreLista) {
+	this->nombreLista = nombreLista;
 }
 
 string Lista::getNombre() {
-	return nombre;
+	return nombreLista;
+}
+
+void Lista::renombrarLista(const string& nombreLista){
+	this->nombreLista = nombreLista;
 }
 
 void Lista::crearTarea(const string& descripcion) {
