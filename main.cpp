@@ -32,6 +32,7 @@ void interfazLista(Cuenta&, const int&);
 void crearTarea(Cuenta&, const int&);
 void renombrarLista(Cuenta&, const int&);
 bool eliminarLista(Cuenta&, const int&);
+void vaciarLista(Cuenta&, const int&);
 
 void interfazTarea(Cuenta&, const int&, const int&);
 void editarTarea(Cuenta&, const int&, const int&);
@@ -554,9 +555,7 @@ void interfazLista(Cuenta& cuenta, const int& listaID) {
 			}
 
 		} else if (opcion == "F" || opcion == "f") {
-			encabezado("Vaciar lista");
-			cout << "\tComing soon . . .";
-			getch();
+			vaciarLista(cuenta, listaID);
 
 		} else if (!salir(opcion)) {
 			opcionInvalida();
@@ -616,7 +615,6 @@ void renombrarLista(Cuenta& cuenta, const int& listaID) {
 }
 
 bool eliminarLista(Cuenta& cuenta, const int& listaID) {
-	const int esc = 27;
 	const string titulo = "Eliminar lista";
 	string opcion;
 	bool accionConfirmada = false;
@@ -650,6 +648,50 @@ bool eliminarLista(Cuenta& cuenta, const int& listaID) {
 	cout << "\tLa lista ha sido eliminada\n";
 	cargando();
 	return true;
+}
+
+void vaciarLista(Cuenta& cuenta, const int& listaID) {
+	const string titulo = "Vaciar lista";
+
+	if (cuenta.getCantTareas(listaID) == 0) {
+		encabezado(titulo);
+		cout << "\tEsta lista ya esta vacia\n";
+		cargando();
+		return;
+	}
+	
+	string opcion;
+	bool accionConfirmada = false;
+
+	while (opcion != "X" && opcion != "x" && !accionConfirmada) {
+		encabezado(titulo);
+		cout << "\tLista: <" << cuenta.getNombreLista(listaID) << ">\n";
+		cout << "\tTodas las tareas de esta lista seran eliminadas permanentemente\n\n";
+		cout << "\tVaciar esta lista?\n\n";
+		cout << "\t[A]: Si, quiero vaciar esta lista\n";
+		cout << "\t[X]: No, no queria hacer esto\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (opcion == "A" || opcion == "a") {
+			accionConfirmada = true;
+		} else if (!salir(opcion)) {
+			opcionInvalida();
+		}
+	}
+
+	if (!accionConfirmada) {
+		return;
+	}
+
+	encabezado(titulo);
+	if (!vaciarListaBD()) {
+		cout << "\tHubo un error al intentar vaciar la lista...\n";
+	} else {
+		cout << "\tLas tareas de esta lista han sido eliminadas con exito!\n";
+	}
+
+	cargando();
 }
 
 void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {

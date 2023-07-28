@@ -306,6 +306,22 @@ bool eliminarListaBD(const int& listaID) {
     return true;
 }
 
+bool vaciarListaBD() {
+    const string lista = "Lista.txt";
+    vector<string> archivos;
+    archivosCont(archivos);
+
+    for (const auto& archivoNom : archivos) {
+        if (archivoNom != lista) {
+            if (!eliminarArchivo(archivoNom)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 // Control de la BD para las tareas
 
 bool cargarDatosTarea(const string& archivoNom, string& descripcion) {
