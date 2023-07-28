@@ -12,6 +12,7 @@ class Tarea {
 	public:
 		Tarea(const string&);
 		string getDescripcion();
+		void editarDescripcion(const string&);
 };
 
 Tarea::Tarea(const string& descripcion) {
@@ -21,6 +22,10 @@ Tarea::Tarea(const string& descripcion) {
 
 string Tarea::getDescripcion(){
 	return descripcion;
+}
+
+void Tarea::editarDescripcion(const string& descripcion) {
+	this->descripcion = descripcion;
 }
 
 #endif

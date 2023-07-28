@@ -21,6 +21,7 @@ class Lista {
 		void mostrarTareas();
 		int getCantTareas();
 		string getDescripcionTarea(const int&);
+		void editarTarea(const int&, const string&);
 };
 
 Lista::Lista(const string& nombreLista) {
@@ -72,6 +73,10 @@ int Lista::getCantTareas() {
 
 string Lista::getDescripcionTarea(const int& tareaID) {
 	return tareas[tareaID].getDescripcion();
+}
+
+void Lista::editarTarea(const int& tareaID, const string& descripcion) {
+	tareas[tareaID].editarDescripcion(descripcion);
 }
 
 #endif

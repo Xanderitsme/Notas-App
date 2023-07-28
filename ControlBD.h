@@ -163,22 +163,6 @@ void actualizarCuentas(vector<Cuenta>& cuentas) {
     }
 }
 
-bool cambiarDatosCuentaBD(const string& usuario, const string& clave) {
-    const string cuenta = "Cuenta.txt";
-    
-    restablecerArchivo(cuenta);
-
-    if (!guardarVariable(cuenta, usuario)) {
-		return false;
-	}
-
-	if (!guardarVariable(cuenta, clave)) {
-		return false;
-	}
-    
-    return true;
-}
-
 bool registroGeneral(const string& nombreArchivo, const int& ID) {
 	if (!crearCarpeta(to_string(ID))) {
 		return false;
@@ -193,6 +177,22 @@ bool registroGeneral(const string& nombreArchivo, const int& ID) {
 		return false;
 	}
 
+    return true;
+}
+
+bool cambiarDatosCuentaBD(const string& usuario, const string& clave) {
+    const string cuenta = "Cuenta.txt";
+    
+    restablecerArchivo(cuenta);
+
+    if (!guardarVariable(cuenta, usuario)) {
+		return false;
+	}
+
+	if (!guardarVariable(cuenta, clave)) {
+		return false;
+	}
+    
     return true;
 }
 
@@ -361,6 +361,18 @@ void actualizarTareas(Cuenta& cuenta, const int& listaID) {
             // error();
         }
     }
+}
+
+bool cambiarDatosTareaBD(string& descripcion, const int& tareaID) {
+    const string extension = ".txt";
+
+    restablecerArchivo(to_string(tareaID) + extension);
+
+    if (!guardarVariable(to_string(tareaID) + extension, descripcion)) {
+        return false;
+    }
+    
+    return true;
 }
 
 bool registrarTareaBD(const string& descripcion, const int& tareaID) {

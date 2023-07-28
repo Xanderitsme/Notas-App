@@ -34,6 +34,7 @@ void renombrarLista(Cuenta&, const int&);
 bool eliminarLista(Cuenta&, const int&);
 
 void interfazTarea(Cuenta&, const int&, const int&);
+void editarTarea(Cuenta&, const int&, const int&);
 bool eliminarTarea(Cuenta&, const int&, const int&);
 
 int main() {
@@ -246,16 +247,20 @@ void interfazCuenta(Cuenta& cuenta, const int& ID) {
 
 		if (convertirStringInt(opcion, listaID) && listaID > 0 && listaID <= cuenta.getCantListas()) {
 			interfazLista(cuenta, listaID - 1);
+
 		} else if (opcion == "A" || opcion == "a") {
 			crearLista(cuenta);
+
 		} else if (opcion == "S" || opcion == "s") {
 			encabezado("Combinar listas");
 			cout << "\tComing soon . . .";
 			getch();
+
 		} else if (opcion == "D" || opcion == "d") {
 			if (configuracionAvanzada(cuenta, ID)) {
 				return;
 			}
+
 		} else if (!salir(opcion)) {
 			opcionInvalida();
 		}
@@ -302,12 +307,15 @@ bool configuracionAvanzada(Cuenta& cuenta, const int& ID) {
 
 		if (opcion == "A" || opcion == "a") {
 			cambiarUsuario(cuenta, ID);
+
 		} else if (opcion == "S" || opcion == "s") {
 			cambiarClave(cuenta, ID); 
+
 		} else if (opcion == "D" || opcion == "d") {
 			if (eliminarCuenta(cuenta, ID)) {
 				return true;
 			}
+
 		} else if (!salir(opcion)) {
 			opcionInvalida();
 		}
@@ -453,6 +461,7 @@ bool eliminarCuenta(Cuenta& cuenta, const int& ID) {
 
 		if (cuenta.credencialesCorrectas(cuenta.getUsuario(), clave)) {
 			accesoConcedido = true;
+
 		} else {
 			encabezado(titulo);
 			cout << "\tLa clave es incorrecta\n";
@@ -475,6 +484,7 @@ bool eliminarCuenta(Cuenta& cuenta, const int& ID) {
 
 		if (opcion == "A" || opcion == "a") {
 			accionConfirmada = true;
+
 		} else if (!salir(opcion) && opcion != "") {
 			opcionInvalida();
 		}
@@ -531,18 +541,23 @@ void interfazLista(Cuenta& cuenta, const int& listaID) {
 
 		if (convertirStringInt(opcion, tareaID) && tareaID > 0 && tareaID <= cuenta.getCantTareas(listaID)) {
 			interfazTarea(cuenta, listaID, tareaID - 1);
+
 		} else if (opcion == "A" || opcion == "a") {
 			crearTarea(cuenta, listaID);
+
 		} else if (opcion == "S" || opcion == "s") {
 			renombrarLista(cuenta, listaID);
+
 		} else if (opcion == "D" || opcion == "d") {
 			if (eliminarLista(cuenta, listaID)) {
 				return;
 			}
+
 		} else if (opcion == "F" || opcion == "f") {
 			encabezado("Vaciar lista");
 			cout << "\tComing soon . . .";
 			getch();
+
 		} else if (!salir(opcion)) {
 			opcionInvalida();
 		}
@@ -558,6 +573,7 @@ void crearTarea(Cuenta& cuenta, const int& listaID) {
 
 	encabezado(titulo);
 	cout << "\tSe encuentra en la lista <" << cuenta.getNombreLista(listaID) << ">\n";
+	separador();
 	cout << "\tEscriba la descripcion para la nueva tarea:\n\n";
 	cout << "\t";
 	getline(cin, descripcion);
@@ -580,7 +596,8 @@ void renombrarLista(Cuenta& cuenta, const int& listaID) {
 	string nombreLista;
 
 	encabezado(titulo);
-	cout << "\tLista: <" << cuenta.getNombreLista(listaID) << ">\n\n";
+	cout << "\tLista: <" << cuenta.getNombreLista(listaID) << ">\n";
+	separador();
 	cout << "\tIngrese el nuevo nombre para la lista: ";
 	getline(cin, nombreLista);
 	if (salir(nombreLista)) {
@@ -659,22 +676,49 @@ void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 			encabezado("Marcar como cumplida");
 			cout << "\tComing soon . . .";
 			getch();
+
 		} else if (opcion == "S" || opcion == "s") {
-			encabezado("Editar tarea");
-			cout << "\tComing soon . . .";
-			getch();
+			editarTarea(cuenta, listaID, tareaID);
+
 		} else if (opcion == "D" || opcion == "d") {
 			if (eliminarTarea(cuenta, listaID, tareaID)) {
 				return;
 			}
+
 		} else if (opcion == "F" || opcion == "f") {
 			encabezado("Transferir tarea");
 			cout << "\tComing soon . . .";
 			getch();
+
 		} else if (!salir(opcion)) {
 			opcionInvalida();
 		}
 	}
+}
+
+void editarTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
+	const string titulo = "Editar tarea";
+	string descripcion;
+
+	encabezado(titulo);
+	cout << "\tTarea: <" << cuenta.getDescripcionTarea(listaID, tareaID) << ">\n";
+	separador();
+	cout << "\tIngrese el nuevo contenido para la tarea:\n\n";
+	cout << "\t";
+	getline(cin, descripcion);
+	if (salir(descripcion)) {
+		return;
+	}
+
+	encabezado(titulo);
+	if (cambiarDatosTareaBD(descripcion, tareaID)) {
+		cuenta.editarTarea(listaID, tareaID, descripcion);
+		cout << "\tEl contenido de la tarea ha sido editado con exito!\n";
+	} else {
+		cout << "\tHa ocurrido un error al intentar editar el contenido de la tarea\n";
+	}
+
+	cargando();
 }
 
 bool eliminarTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {

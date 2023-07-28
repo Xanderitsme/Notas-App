@@ -30,6 +30,7 @@ class Cuenta {
 		void mostrarTareas(const int&);
 		int getCantTareas(const int&);
 		string getDescripcionTarea(const int&, const int&);
+		void editarTarea(const int&, const int&, const string&);
 };
 
 Cuenta::Cuenta(const string& usuario, const string& clave) {
@@ -119,6 +120,10 @@ int Cuenta::getCantTareas(const int& listaID) {
 
 string Cuenta::getDescripcionTarea(const int& listaID, const int& tareaID) {
 	return listas[listaID].getDescripcionTarea(tareaID);
+}
+
+void Cuenta::editarTarea(const int& listaID, const int& tareaID, const string& descripcion) {
+	listas[listaID].editarTarea(tareaID, descripcion);
 }
 
 #endif
