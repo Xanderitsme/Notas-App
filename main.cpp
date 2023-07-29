@@ -931,7 +931,7 @@ void editarTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 
 bool eliminarTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 	const int esc = 27;
-	const string titulo = "Eliminar nota";
+	const string titulo = "Eliminar tarea";
 	string opcion;
 	bool accionConfirmada = false;
 
@@ -939,7 +939,7 @@ bool eliminarTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 		encabezado(titulo);
 		cout << "\tEsta tarea sera eliminada:\n";
 		cout << "\t<" << cuenta.getDescripcionTarea(listaID, tareaID) << ">\n\n";
-		cout << "\tEliminar esta tarea?\n\n";
+		cout << "\tEliminar tarea?\n\n";
 		cout << "\t[A]: Si, quiero eliminar esta tarea\n";
 		cout << "\t[X]: No, no queria hacer esto\n";
 		cout << "\t-> ";
@@ -994,11 +994,13 @@ bool transferirTarea(Cuenta& cuenta, const int& listOrigID, const int& tareaID) 
 		getline(cin, opcion);
 
 		if (convertirStringInt(opcion, listDestID) && listDestID > 0 && listDestID <= cuenta.getCantListas()) {
+			listDestID--;
 			if (listOrigID == listDestID) {
 				encabezado(titulo);
-				cout << "\tLa lista de origen y de destino no pueden ser iguales\n";
-				opcionInvalida();
-			} else if (confirmarTransferencia(cuenta, listOrigID, listDestID - 1, tareaID)) {
+				cout << "\tLas listas de origen y destino no pueden ser iguales!\n";
+				cargando();
+
+			} else if (confirmarTransferencia(cuenta, listOrigID, listDestID, tareaID)) {
 				transferenciaConfirmada = true;
 			}
 
@@ -1012,8 +1014,9 @@ bool transferirTarea(Cuenta& cuenta, const int& listOrigID, const int& tareaID) 
 	}
 
 	encabezado(titulo);
-	if (/*transferorTareaBD()*/ false) {
+	if (!transferirTareaBD(listOrigID, listDestID, tareaID)) {
 		cout << "\tHubo un error al intentar trasnferir esta tarea...\n";
+		cargando();
 		return false;
 	}
 
@@ -1028,8 +1031,7 @@ bool confirmarTransferencia(Cuenta& cuenta, const int& listOrigID, const int& li
 
 	while (opcion != "X" && opcion != "x") {
 		encabezado(titulo);
-		cout << "\tLa siguiente accion sera realizada\n\n";
-		cout << "\tTransferir esta tarea: \n";
+		cout << "\tSe transferira esta tarea: \n";
 		cout << "\t<" << cuenta.getDescripcionTarea(listOrigID, tareaID) << ">\n\n";
 		cout << "\tDesde: <" << cuenta.getNombreLista(listOrigID) << ">\n";
 		cout << "\tHacia: <" << cuenta.getNombreLista(listDestID) << ">\n";

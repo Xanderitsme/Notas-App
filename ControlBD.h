@@ -4,24 +4,12 @@
 #include <iostream>
 #include <conio.h>
 #include <vector>
+
+#include "Carpetas.h"
+#include "Archivos.h"
+#include "Cadenas.h"
+
 using namespace std;
-
-int carpetasCont(vector<string>&);
-bool existeCarpeta(const string&);
-bool crearCarpeta(const string &);
-bool accederCarpeta(const string&);
-bool cambiarNombreAC(const string&, const string&);
-void volverCarpetaAnt();
-
-bool existeArchivo(const string&);
-int cantidadVariables(const string&);
-void cargarVariables(const string&, vector<string>&, const int&);
-void restablecerArchivo(const string&);
-int archivosCont(vector<string>&);
-
-bool convertirStringInt(const string&, int&);
-void ordenarVector(vector<string>&);
-bool datoValido(const string&);
 
 class Cuenta;
 
@@ -263,7 +251,7 @@ void actualizarListas(Cuenta& cuenta) {
             if (carpetaNom != to_string(listaID)) {
                 cambiarNombreAC(carpetaNom, to_string(listaID));
             }
-
+            
         } else {
             error();
         }
@@ -375,7 +363,7 @@ void actualizarTareas(Cuenta& cuenta, const int& listaID) {
                 cambiarNombreAC(archivoNom, to_string(tareaID) + extension);
             }
         } else {
-            // error();
+            error();
         }
     }
 }
@@ -413,6 +401,40 @@ bool eliminarTareaBD(const int& tareaID) {
         return false;
     }
 
+    return true;
+}
+
+bool transferirTareaBD(const int& listOrigID, const int& listDestID, const int& tareaID) {
+    const string extension = ".txt";
+    string descripcion;
+
+    if (!cargarDatosTarea(to_string(tareaID) + extension, descripcion)) {
+        return false;
+    }
+
+    volverCarpetaAnt();
+    
+    if (!accederCarpeta(to_string(listDestID))) {
+        return false;
+    }
+
+    vector<string> archivos;
+    int tareaTransferidaID = archivosCont(archivos) - 1;
+
+    if (!registrarTareaBD(descripcion, tareaTransferidaID)) {
+        return false;
+    }
+
+    volverCarpetaAnt();
+
+    if (!accederCarpeta(to_string(listOrigID))) {
+        return false;
+    }
+
+    if (!eliminarArchivo(to_string(tareaID) + extension)) {
+        return false;
+    }
+    
     return true;
 }
 
