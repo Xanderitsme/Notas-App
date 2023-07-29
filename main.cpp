@@ -22,7 +22,12 @@ bool usuarioValidoCambio(const string&, const int&);
 
 void interfazCuenta(Cuenta&, const int&);
 void crearLista(Cuenta&);
-// void combinarListas();
+
+void combinarListas(Cuenta&);
+bool crearNombreLista(string&);
+void mostrarListasSel(Cuenta&, const vector<int>&);
+void seleccionarLista(vector<int>&, const int&);
+
 bool configuracionAvanzada(Cuenta&, const int&);
 void cambiarUsuario(Cuenta&, const int&);
 void cambiarClave(Cuenta&, const int&);
@@ -253,9 +258,7 @@ void interfazCuenta(Cuenta& cuenta, const int& ID) {
 			crearLista(cuenta);
 
 		} else if (opcion == "S" || opcion == "s") {
-			encabezado("Combinar listas");
-			cout << "\tComing soon . . .";
-			getch();
+			combinarListas(cuenta);
 
 		} else if (opcion == "D" || opcion == "d") {
 			if (configuracionAvanzada(cuenta, ID)) {
@@ -290,6 +293,151 @@ void crearLista(Cuenta& cuenta) {
 	}
 	
 	cargando();
+}
+
+void combinarListas(Cuenta& cuenta) {
+	const string titulo = "Combinar listas";
+
+	if (cuenta.getCantListas() < 2) {
+		encabezado(titulo);
+		cout << "\tDebe crear al menos 2 listas para poder usar esta opcion!\n";
+		cargando();
+		return;		
+	}
+
+	vector<int> listasSeleccionadas;
+	int listaID;
+	bool seleccionConfirmada = false;
+	string opcion;
+
+	while (opcion != "X" && opcion != "x" && !seleccionConfirmada) {
+		encabezado(titulo);
+		cout << "\tEscriba el numero de una lista para seleccionarla\n";
+		cout << "\tVuelva a escribir el numero de una lista para deseleccionarla\n";
+		if (listasSeleccionadas.size() > 0) {
+			cout << "\n\tHa seleccionado las listas: ";
+			for (const auto& LiSelID : listasSeleccionadas) {
+				cout << "[" << LiSelID + 1 << "]";
+			}
+			cout << "\n";
+		}
+		cout << "\n";
+		cuenta.mostrarListas();
+
+		separador();
+		if (listasSeleccionadas.size() > 1) {
+			cout << "\t[A]: Empezar a combinar listas\n";
+		}
+		cout << "\t[X]: Volver\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if ((opcion == "A" || opcion == "a") && listasSeleccionadas.size() > 1) {
+			seleccionConfirmada = true;
+
+		} else if (convertirStringInt(opcion, listaID) && listaID > 0 && listaID <= cuenta.getCantListas()) {
+			seleccionarLista(listasSeleccionadas, listaID - 1);
+
+		} else if (!salir(opcion)) {
+			opcionInvalida();
+		}
+	}
+
+	if (!seleccionConfirmada) {
+		return;
+	}
+
+	int listSelID;
+	bool accionConfirmada = false;
+	string nombreLista;
+
+	while (opcion != "X" && opcion != "x" && !accionConfirmada) {
+		encabezado(titulo);
+		cout << "\tLas listas a combinar seran las siguientes:\n\n";
+		mostrarListasSel(cuenta, listasSeleccionadas);
+
+		separador();
+		cout << "\tAhora debe elgir un nombre\n";
+		cout << "\tEscriba el numero de alguna lista si desea usarlo como nombre o elija una opcion\n\n";
+		cout << "\t[A]: Crear un nuevo nombre\n";
+		cout << "\t[X]: Cancelar\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (convertirStringInt(opcion, listSelID) && listSelID > 0 && listSelID <= listasSeleccionadas.size()) {
+			nombreLista = cuenta.getNombreLista(listasSeleccionadas[listSelID - 1]);
+			accionConfirmada = true;
+
+		} else if (opcion == "A" || opcion == "a") {
+			if (crearNombreLista(nombreLista)) {
+				accionConfirmada = true;
+			}
+
+		} else if (!salir(opcion)) {
+			opcionInvalida();
+		}
+	}
+
+	if (!accionConfirmada) {
+		return;
+	}
+
+	// combinarListasBD();
+}
+
+bool crearNombreLista(string& nombreLista) {
+	const string titulo = "Combinar listas";
+
+	encabezado(titulo);
+	cout << "\tIngrese un nombre para la nueva lista: ";
+	getline(cin, nombreLista);
+	if (salir(nombreLista)) {
+		return false;
+	}
+
+	return true;
+}
+
+void mostrarListasSel(Cuenta& cuenta, const vector<int>& listasSeleccionadas) {
+	const string fin = "...";
+	const int limiteNombre = 70;
+	int indice = 1;
+	string nombreRecortado;
+
+	for (const auto& listSelID : listasSeleccionadas) {
+		cout << "\t[" << indice << "]: <";
+
+		if (cuenta.getNombreLista(listSelID).size() > limiteNombre) {
+			nombreRecortado = cuenta.getNombreLista(listSelID).substr(0, limiteNombre - fin.size());
+			cout << nombreRecortado << fin;
+		} else {
+			cout << cuenta.getNombreLista(listSelID);
+		}
+
+		cout << ">\n";
+		indice++;
+	}
+}
+
+void seleccionarLista(vector<int>& listasSeleccionadas, const int& listaID) {
+	bool listaSeleccionada = false;
+	int indice = 0;
+
+	for (const auto& listSelID : listasSeleccionadas) {
+		if (listaID == listSelID) {
+			listaSeleccionada = true;
+			break;
+		}
+
+		indice++;
+	}
+
+	if (!listaSeleccionada) {
+		listasSeleccionadas.push_back(listaID);
+		return;
+	}
+
+	listasSeleccionadas.erase(listasSeleccionadas.begin() + indice);
 }
 
 bool configuracionAvanzada(Cuenta& cuenta, const int& ID) {
@@ -447,8 +595,8 @@ void cambiarClave(Cuenta& cuenta, const int& ID) {
 bool eliminarCuenta(Cuenta& cuenta, const int& ID) {
 	const int esc = 27;
 	const string titulo = "Eliminar cuenta";
-	string clave, opcion;
-	bool accesoConcedido = false, accionConfirmada = false;
+	string clave;
+	bool accesoConcedido = false;
 	char tecla = 0;
 
 	while (tecla != esc && tecla != 'X' && tecla != 'x' && !accesoConcedido) {
@@ -473,6 +621,9 @@ bool eliminarCuenta(Cuenta& cuenta, const int& ID) {
 	if (!accesoConcedido) {
 		return false;
 	}
+
+	string opcion;
+	bool accionConfirmada = false;
 
 	while (opcion != "X" && opcion != "x" && !accionConfirmada) {
 		encabezado(titulo);
