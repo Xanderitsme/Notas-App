@@ -17,6 +17,7 @@ bool existeArchivo(const string&);
 int cantidadVariables(const string&);
 void cargarVariables(const string&, vector<string>&, const int&);
 void restablecerArchivo(const string&);
+int archivosCont(vector<string>&);
 
 bool convertirStringInt(const string&, int&);
 void ordenarVector(vector<string>&);
@@ -412,6 +413,74 @@ bool eliminarTareaBD(const int& tareaID) {
         return false;
     }
 
+    return true;
+}
+
+// Algunas funciones extras para el control de la BD de las listas
+
+bool copiarLista(const int& listID_origen, const int& listID_destino) {
+    if (!accederCarpeta(to_string(listID_origen))) {
+        return false;
+    }
+
+    vector<string> archivos;
+    archivosCont(archivos);
+    estandarizarArchivos(archivos);
+    ordenarVector(archivos);
+    agregarExtensionTXT(archivos);
+
+    vector<string> descripciones;
+    string descripcionTemp;
+
+    for (const auto& archivoNom : archivos) {
+        if (!cargarDatosTarea(archivoNom, descripcionTemp)) {
+            return false;
+        }
+
+        descripciones.push_back(descripcionTemp);
+    }
+
+    volverCarpetaAnt();
+
+    if (!accederCarpeta(to_string(listID_destino))) {
+        return false;
+    }
+
+    while (archivos.size() > 0) {
+        archivos.erase(archivos.begin());
+    }
+
+    int tareaID = archivosCont(archivos) - 1;
+
+    for (const auto& descripcion : descripciones) {
+        cout << "tareaID: " << tareaID << "\n";
+        if (!registrarTareaBD(descripcion, tareaID)) {
+            return false;
+        }
+
+        tareaID++;
+    }
+
+    volverCarpetaAnt();
+    return true;
+}
+
+bool combinarListasBD(const string& nombreLista, const int& listaID, const vector<int>& listasSeleccionadas) {
+    if (!registrarListaBD(nombreLista, listaID)) {
+        return false;
+    }
+
+    for (const auto& listSelID : listasSeleccionadas) {
+        if (!copiarLista(listSelID, listaID)) {
+            return false;
+        }
+
+        if (!eliminarCarpeta(to_string(listSelID))) {
+            return false;
+        }
+    }
+
+    system("pause");
     return true;
 }
 

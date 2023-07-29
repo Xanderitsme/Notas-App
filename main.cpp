@@ -382,7 +382,16 @@ void combinarListas(Cuenta& cuenta) {
 		return;
 	}
 
-	// combinarListasBD();
+	listaID = cuenta.getCantListas();
+
+	encabezado(titulo);
+	if (combinarListasBD(nombreLista, listaID, listasSeleccionadas)) {
+		cout << "\tLas listas han sido combinadas con exito!\n";
+	} else {
+		cout << "\tHa ocurrido un error al intentar combinar las listas\n";
+	}
+	
+	cargando();
 }
 
 bool crearNombreLista(string& nombreLista) {
