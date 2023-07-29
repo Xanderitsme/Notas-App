@@ -453,7 +453,6 @@ bool copiarLista(const int& listID_origen, const int& listID_destino) {
     int tareaID = archivosCont(archivos) - 1;
 
     for (const auto& descripcion : descripciones) {
-        cout << "tareaID: " << tareaID << "\n";
         if (!registrarTareaBD(descripcion, tareaID)) {
             return false;
         }
@@ -480,7 +479,6 @@ bool combinarListasBD(const string& nombreLista, const int& listaID, const vecto
         }
     }
 
-    system("pause");
     return true;
 }
 

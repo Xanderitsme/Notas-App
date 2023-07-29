@@ -24,7 +24,7 @@ void interfazCuenta(Cuenta&, const int&);
 void crearLista(Cuenta&);
 
 void combinarListas(Cuenta&);
-bool crearNombreLista(string&);
+bool crearNombreLista(Cuenta&, const vector<int>&, string&);
 void mostrarListasSel(Cuenta&, const vector<int>&);
 void seleccionarLista(vector<int>&, const int&);
 
@@ -40,8 +40,11 @@ bool eliminarLista(Cuenta&, const int&);
 void vaciarLista(Cuenta&, const int&);
 
 void interfazTarea(Cuenta&, const int&, const int&);
+// void marcarTarea();
 void editarTarea(Cuenta&, const int&, const int&);
 bool eliminarTarea(Cuenta&, const int&, const int&);
+bool transferirTarea(Cuenta&, const int&, const int&);
+bool confirmarTransferencia(Cuenta&, const int&, const int&, const int&);
 
 int main() {
 	system("color 07");
@@ -279,7 +282,7 @@ void crearLista(Cuenta& cuenta) {
 	string nombreLista;
 
 	encabezado(titulo);
-	cout << "\tIngrese un nombre para la nueva lista: ";
+	cout << "\tEscriba un nombre para la nueva lista: ";
 	getline(cin, nombreLista);
 	if (salir(nombreLista)) {
 		return;
@@ -369,7 +372,7 @@ void combinarListas(Cuenta& cuenta) {
 			accionConfirmada = true;
 
 		} else if (opcion == "A" || opcion == "a") {
-			if (crearNombreLista(nombreLista)) {
+			if (crearNombreLista(cuenta, listasSeleccionadas, nombreLista)) {
 				accionConfirmada = true;
 			}
 
@@ -394,11 +397,15 @@ void combinarListas(Cuenta& cuenta) {
 	cargando();
 }
 
-bool crearNombreLista(string& nombreLista) {
+bool crearNombreLista(Cuenta& cuenta, const vector<int>& listasSeleccionadas, string& nombreLista) {
 	const string titulo = "Combinar listas";
 
 	encabezado(titulo);
-	cout << "\tIngrese un nombre para la nueva lista: ";
+	cout << "\tLas listas a combinar seran las siguientes:\n\n";
+	mostrarListasSel(cuenta, listasSeleccionadas);
+
+	separador();
+	cout << "\tEscriba un nombre para la nueva lista: ";
 	getline(cin, nombreLista);
 	if (salir(nombreLista)) {
 		return false;
@@ -805,7 +812,7 @@ bool eliminarLista(Cuenta& cuenta, const int& listaID) {
 		return false;
 	}
 
-	cout << "\tLa lista ha sido eliminada\n";
+	cout << "\tLa lista ha sido eliminada!\n";
 	cargando();
 	return true;
 }
@@ -815,7 +822,7 @@ void vaciarLista(Cuenta& cuenta, const int& listaID) {
 
 	if (cuenta.getCantTareas(listaID) == 0) {
 		encabezado(titulo);
-		cout << "\tEsta lista ya esta vacia\n";
+		cout << "\tEsta lista ya esta vacia!\n";
 		cargando();
 		return;
 	}
@@ -888,10 +895,9 @@ void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 			}
 
 		} else if (opcion == "F" || opcion == "f") {
-			encabezado("Transferir tarea");
-			cout << "\tComing soon . . .";
-			getch();
-
+			if (transferirTarea(cuenta, listaID, tareaID)) {
+				return;
+			}
 		} else if (!salir(opcion)) {
 			opcionInvalida();
 		}
@@ -959,4 +965,89 @@ bool eliminarTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 	cout << "\tLa tarea ha sido eliminada\n";
 	cargando();
 	return true;
+}
+
+bool transferirTarea(Cuenta& cuenta, const int& listOrigID, const int& tareaID) {
+	const string titulo = "Transferir tarea";
+
+	if (cuenta.getCantListas() < 2) {
+		encabezado(titulo);
+		cout << "\tDebe crear al menos 2 listas para poder usar esta opcion!\n";
+		cargando();
+		return false;		
+	}
+
+	string opcion;
+	int listDestID;
+	bool transferenciaConfirmada = false;
+
+	while (opcion != "X" && opcion != "x" && !transferenciaConfirmada) {
+		encabezado(titulo);
+		cout << "\tTarea:\n";
+		cout << "\t<" << cuenta.getDescripcionTarea(listOrigID, tareaID) << ">\n";
+		separador();
+		cout << "\tEscriba el numero de la lista a la cual transferira esta tarea\n\n";
+		cuenta.mostrarListas();
+
+		separador();
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (convertirStringInt(opcion, listDestID) && listDestID > 0 && listDestID <= cuenta.getCantListas()) {
+			if (listOrigID == listDestID) {
+				encabezado(titulo);
+				cout << "\tLa lista de origen y de destino no pueden ser iguales\n";
+				opcionInvalida();
+			} else if (confirmarTransferencia(cuenta, listOrigID, listDestID - 1, tareaID)) {
+				transferenciaConfirmada = true;
+			}
+
+		} else if (!salir(opcion)) {
+			opcionInvalida();
+		}
+	}
+	
+	if (!transferenciaConfirmada) {
+		return false;
+	}
+
+	encabezado(titulo);
+	if (/*transferorTareaBD()*/ false) {
+		cout << "\tHubo un error al intentar trasnferir esta tarea...\n";
+		return false;
+	}
+
+	cout << "\tLa lista ha sido transferida con exito!\n";
+	cargando();
+	return true;
+}
+
+bool confirmarTransferencia(Cuenta& cuenta, const int& listOrigID, const int& listDestID, const int& tareaID) {
+	const string titulo = "Transferir tarea";
+	string opcion;
+
+	while (opcion != "X" && opcion != "x") {
+		encabezado(titulo);
+		cout << "\tLa siguiente accion sera realizada\n\n";
+		cout << "\tTransferir esta tarea: \n";
+		cout << "\t<" << cuenta.getDescripcionTarea(listOrigID, tareaID) << ">\n\n";
+		cout << "\tDesde: <" << cuenta.getNombreLista(listOrigID) << ">\n";
+		cout << "\tHacia: <" << cuenta.getNombreLista(listDestID) << ">\n";
+		separador();
+
+		cout << "\tConfirmar esta accion?\n\n";
+		cout << "\t[A]: Si, transferir tarea\n";
+		cout << "\t[X]: No, volver a elegir destino\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (opcion == "A" || opcion == "a") {
+			return true;
+		} else if (!salir(opcion)) {
+			opcionInvalida();
+		}
+
+	}
+
+	return false;
 }
