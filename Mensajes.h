@@ -82,29 +82,42 @@ void mensajeError(char& tecla) {
 	tecla = getch();
 }
 
-void opcionInvalida() {
-	encabezado("");
-	cout << "\tLa opcion seleccionada no existe, por favor vuelva a intentarlo\n\n";
-	cout << "\tPresione cualquier tecla para continuar . . .";
-	getch();
-}
-
-void cargando() {
-	cout << "\n\t\tCargando ";
-	Sleep(400);
-	cout << ". ";
-	Sleep(400);
-	cout << ". ";
-	Sleep(400);
-	cout << ". ";
-	Sleep(400);
-}
-
 bool salir(const string& opcion) {
 	if (opcion == "X" || opcion == "x") {
 		return true;
 	}
 	return false;
+}
+
+void limpiarBuffer() {
+    while (_kbhit()) {
+        _getch();
+    }
+}
+
+void opcionInvalida() {
+	const int milisegundos = 1500, cantidadPuntos = 3, frame = milisegundos / (cantidadPuntos + 1);
+	encabezado("");
+	cout << "\tLa opcion seleccionada no existe, por favor vuelva a intentarlo";
+	Sleep(frame);
+	for (int i = 0; i < cantidadPuntos; i++) {
+		cout << " .";
+		Sleep(frame);
+	}
+	limpiarBuffer();
+}
+
+void cargando() {
+	const int milisegundos = 1500, frame = milisegundos / 4;
+	cout << "\n\t\tCargando ";
+	Sleep(frame);
+	cout << ". ";
+	Sleep(frame);
+	cout << ". ";
+	Sleep(frame);
+	cout << ". ";
+	Sleep(frame);
+	limpiarBuffer();
 }
 
 #endif

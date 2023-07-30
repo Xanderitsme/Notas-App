@@ -31,6 +31,8 @@ class Cuenta {
 		int getCantTareas(const int&);
 		string getDescripcionTarea(const int&, const int&);
 		void editarTarea(const int&, const int&, const string&);
+		bool tareaCumplida(const int&, const int&);
+		void cambiarEstadoTarea(const int&, const int&);
 };
 
 Cuenta::Cuenta(const string& usuario, const string& clave) {
@@ -124,6 +126,14 @@ string Cuenta::getDescripcionTarea(const int& listaID, const int& tareaID) {
 
 void Cuenta::editarTarea(const int& listaID, const int& tareaID, const string& descripcion) {
 	listas[listaID].editarTarea(tareaID, descripcion);
+}
+
+bool Cuenta::tareaCumplida(const int& listaID, const int& tareaID) {
+	return listas[listaID].tareaCumplida(tareaID);
+}
+
+void Cuenta::cambiarEstadoTarea(const int& listaID, const int& tareaID) {
+	listas[listaID].cambiarEstadoTarea(tareaID);
 }
 
 #endif
