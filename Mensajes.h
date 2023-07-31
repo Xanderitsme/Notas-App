@@ -108,7 +108,7 @@ void opcionInvalida() {
 }
 
 void cargando() {
-	const int milisegundos = 2000, frame = milisegundos / 4;
+	const int milisegundos = 1500, frame = milisegundos / 4;
 	cout << "\n\t\tCargando ";
 	Sleep(frame);
 	cout << ". ";

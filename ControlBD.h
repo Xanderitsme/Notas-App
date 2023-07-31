@@ -313,22 +313,10 @@ bool vaciarListaBD() {
 
 // Control de la BD para las tareas
 
-bool cargarDatosTarea(const string& archivoNom, string& descripcion, bool& estado) {
+bool cargarDatosTarea(const string& archivoNom, string& descripcion) {
     vector<string> datos;
-    cargarVariables(archivoNom, datos, 2);
+    cargarVariables(archivoNom, datos, 1);
     descripcion = datos[0];
-
-    int estadoInt;
-    if (convertirStringInt(datos[1], estadoInt) && (estadoInt == 0 || estadoInt == 1)) {
-        estado = estadoInt;
-    } else if (datos[1] == "true") {
-        estado = true;
-    } else if (datos[1] == "false") {
-        estado = false;
-    } else {
-        estado = false;
-        // return false;
-    }
 
     return true;
 }
@@ -365,16 +353,12 @@ void actualizarTareas(Cuenta& cuenta, const int& listaID) {
 
     const string extension = ".txt";
     string descripcion;
-    bool estado;
     int tareaID;
 
     for (const auto& archivoNom : archivos) {
         tareaID = cuenta.getCantTareas(listaID);
-        if (cargarDatosTarea(archivoNom, descripcion, estado)) {
+        if (cargarDatosTarea(archivoNom, descripcion)) {
             cuenta.crearTarea(listaID, descripcion);
-            if (estado) {
-                cuenta.cambiarEstadoTarea(listaID, tareaID);
-            }
             if (archivoNom != to_string(tareaID) + extension) {
                 cambiarNombreAC(archivoNom, to_string(tareaID) + extension);
             }
@@ -384,7 +368,7 @@ void actualizarTareas(Cuenta& cuenta, const int& listaID) {
     }
 }
 
-bool cambiarDatosTareaBD(const string& descripcion, const bool& estado, const int& tareaID) {
+bool cambiarDatosTareaBD(string& descripcion, const int& tareaID) {
     const string extension = ".txt";
 
     restablecerArchivo(to_string(tareaID) + extension);
@@ -392,17 +376,12 @@ bool cambiarDatosTareaBD(const string& descripcion, const bool& estado, const in
     if (!guardarVariable(to_string(tareaID) + extension, descripcion)) {
         return false;
     }
-
-    if (!guardarVariable(to_string(tareaID) + extension, to_string(estado))) {
-        return false;
-    }
-
+    
     return true;
 }
 
 bool registrarTareaBD(const string& descripcion, const int& tareaID) {
     const string extension = ".txt";
-    const bool estado = false;
 
     if (!crearArchivo(to_string(tareaID) + extension)) {
         return false;
@@ -411,11 +390,7 @@ bool registrarTareaBD(const string& descripcion, const int& tareaID) {
     if (!guardarVariable(to_string(tareaID) + extension, descripcion)) {
         return false;
     }
-
-    if (!guardarVariable(to_string(tareaID) + extension, to_string(estado))) {
-        return false;
-    }
-
+    
     return true;
 }
 
@@ -432,9 +407,8 @@ bool eliminarTareaBD(const int& tareaID) {
 bool transferirTareaBD(const int& listOrigID, const int& listDestID, const int& tareaID) {
     const string extension = ".txt";
     string descripcion;
-    bool estado;
 
-    if (!cargarDatosTarea(to_string(tareaID) + extension, descripcion, estado)) {
+    if (!cargarDatosTarea(to_string(tareaID) + extension, descripcion)) {
         return false;
     }
 
@@ -449,12 +423,6 @@ bool transferirTareaBD(const int& listOrigID, const int& listDestID, const int& 
 
     if (!registrarTareaBD(descripcion, tareaTransferidaID)) {
         return false;
-    }
-
-    if (estado) {
-        if (!cambiarDatosTareaBD(descripcion, estado, tareaTransferidaID)) {
-            return false;
-        }
     }
 
     volverCarpetaAnt();
@@ -484,17 +452,14 @@ bool copiarLista(const int& listID_origen, const int& listID_destino) {
     agregarExtensionTXT(archivos);
 
     vector<string> descripciones;
-    vector<int> estados;
     string descripcionTemp;
-    bool estadoTemp;
 
     for (const auto& archivoNom : archivos) {
-        if (!cargarDatosTarea(archivoNom, descripcionTemp, estadoTemp)) {
+        if (!cargarDatosTarea(archivoNom, descripcionTemp)) {
             return false;
         }
 
         descripciones.push_back(descripcionTemp);
-        estados.push_back(estadoTemp);
     }
 
     volverCarpetaAnt();
@@ -507,21 +472,14 @@ bool copiarLista(const int& listID_origen, const int& listID_destino) {
         archivos.erase(archivos.begin());
     }
 
-    int tareaID = archivosCont(archivos) - 1, indice = 0;
-    bool estado;
+    int tareaID = archivosCont(archivos) - 1;
 
     for (const auto& descripcion : descripciones) {
-        estado = estados[indice];
         if (!registrarTareaBD(descripcion, tareaID)) {
             return false;
         }
 
-        if (estado) {
-            cambiarDatosTareaBD(descripcion, estado, tareaID);
-        }
-
         tareaID++;
-        indice++;
     }
 
     volverCarpetaAnt();
