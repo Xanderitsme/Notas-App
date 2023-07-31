@@ -871,6 +871,14 @@ void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 		encabezado(titulo);
 		cout << "\tSe encuentra en la lista <" << cuenta.getNombreLista(listaID) << ">\n";
 		cout << "\tEscriba la letra de la opcion que desee\n\n";
+		cout << "\tEstado: ";
+
+		if (cuenta.tareaCumplida(listaID, tareaID)) {
+			cout << "Cumplida";
+		} else {
+			cout << "No cumplida";
+		}
+		cout << "\n";
 		cout << "\t<" << cuenta.getDescripcionTarea(listaID, tareaID) << ">\n";
 
 		separador();
@@ -883,9 +891,13 @@ void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 		getline(cin, opcion);
 
 		if (opcion == "A" || opcion == "a") {
-			encabezado("Marcar como cumplida");
-			cout << "\tComing soon . . .";
-			getch();
+			encabezado("Marcar tarea");
+			if (cambiarDatosTareaBD(cuenta.getDescripcionTarea(listaID, tareaID), !cuenta.tareaCumplida(listaID, tareaID), tareaID)) {
+				cout << "\tLa tarea ha sido marcada correctamente\n";
+			} else {
+				cout << "\tHa ocurrido un error al tratar de marcar la tarea\n";
+			}
+			cargando();
 
 		} else if (opcion == "S" || opcion == "s") {
 			editarTarea(cuenta, listaID, tareaID);
@@ -920,7 +932,8 @@ void editarTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 	}
 
 	encabezado(titulo);
-	if (cambiarDatosTareaBD(descripcion, tareaID)) {
+	bool estado = cuenta.tareaCumplida(listaID, tareaID);
+	if (cambiarDatosTareaBD(descripcion, estado, tareaID)) {
 		cuenta.editarTarea(listaID, tareaID, descripcion);
 		cout << "\tEl contenido de la tarea ha sido editado con exito!\n";
 	} else {
