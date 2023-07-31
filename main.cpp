@@ -124,7 +124,6 @@ void iniciarSesion(vector<Cuenta>& cuentas) {
 	}
 
 	cargando();
-	limpiarBuffer();
 	interfazCuenta(cuentas[ID], ID);
 }
 
