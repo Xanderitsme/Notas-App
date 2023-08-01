@@ -40,6 +40,8 @@ bool eliminarLista(Cuenta&, const int&);
 void vaciarLista(Cuenta&, const int&);
 
 void interfazListaCumplidas(Cuenta&, const int&);
+void interfazTareaC(Cuenta&, const int&, const int&);
+bool desecharTareasC(Cuenta&, const int&);
 
 void interfazTarea(Cuenta&, const int&, const int&);
 bool cambiarEstadoTarea(Cuenta&, const int&, const int&, const bool&);
@@ -840,7 +842,8 @@ void vaciarLista(Cuenta& cuenta, const int& listaID) {
 	while (opcion != "X" && opcion != "x" && !accionConfirmada) {
 		encabezado(titulo);
 		cout << "\tLista: <" << cuenta.getNombreLista(listaID) << ">\n";
-		cout << "\tTodas las tareas de esta lista seran eliminadas permanentemente\n\n";
+		cout << "\tTodas las tareas de esta lista seran eliminadas permanentemente\n";
+		separador();
 		cout << "\tVaciar esta lista?\n\n";
 		cout << "\t[A]: Si, quiero vaciar esta lista\n";
 		cout << "\t[X]: No, no queria hacer esto\n";
@@ -898,16 +901,19 @@ void interfazListaCumplidas(Cuenta& cuenta, const int& listaID) {
 		cuenta.mostrarTareasC(listaID);
 
 		separador();
-		cout << "\t[A]: Vaciar lista\n";
+		cout << "\t[A]: Desechar tareas cumplidas\n";
 		cout << "\t[X]: Volver\n";
 		cout << "\t-> ";
 		getline(cin, opcion);
 
 		if (convertirStringInt(opcion, tareaCID) && tareaCID > 0 && tareaCID <= cuenta.getCantTareasC(listaID)) {
-			// interfazTarea(cuenta, listaID, tareaID - 1);
+			interfazTareaC(cuenta, listaID, tareaCID - 1);
 
 		} else if (opcion == "A" || opcion == "a") {
-			// vaciar lista
+			if (desecharTareasC(cuenta, listaID)) {
+				volverCarpetaAnt();
+				return;
+			}
 
 		} else if (!salir(opcion)) {
 			opcionInvalida();
@@ -915,6 +921,73 @@ void interfazListaCumplidas(Cuenta& cuenta, const int& listaID) {
 	}
 
 	volverCarpetaAnt();
+}
+
+void interfazTareaC(Cuenta& cuenta, const int& listaID, const int& tareaCID) {
+	const string titulo = "Mostrando tarea cumplida";
+	string opcion;
+
+	while (opcion != "X" && opcion != "x") {
+		actualizarTareasC(cuenta, listaID);
+		encabezado(titulo);
+		cout << "\tSe encuentra en la lista <" << cuenta.getNombreLista(listaID) << ">\n";
+		cout << "\tEscriba la letra de la opcion que desee\n\n";
+		cout << "\tEstado: Cumplida\n";
+		cout << "\t<" << cuenta.getDescripcionTareaC(listaID, tareaCID) << ">\n";
+
+		separador();
+		cout << "\t[A]: Marcar como no cumplida\n";
+		cout << "\t[X]: Volver\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (opcion == "A" || opcion == "a") {
+			if (cambiarEstadoTarea(cuenta, listaID, tareaCID, true)) {
+				return;
+			}
+		} else if (!salir(opcion)) {
+			opcionInvalida();
+		}
+	}
+}
+
+bool desecharTareasC(Cuenta& cuenta, const int& listaID) {
+	const string titulo = "Desechar tareas";
+	string opcion;
+	bool accionConfirmada = false;
+
+	while (opcion != "X" && opcion != "x" && !accionConfirmada) {
+		encabezado(titulo);
+		cout << "\tLista: <" << cuenta.getNombreLista(listaID) << ">\n";
+		cout << "\tTodas las tareas cumplidas de esta lista seran eliminadas\n";
+		separador();
+		cout << "\tEliminar tareas cumplidas?\n\n";
+		cout << "\t[A]: Si, eliminar tareas\n";
+		cout << "\t[X]: No, no queria hacer esto\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (opcion == "A" || opcion == "a") {
+			accionConfirmada = true;
+		} else if (!salir(opcion)) {
+			opcionInvalida();
+		}
+	}
+
+	if (!accionConfirmada) {
+		return false;
+	}
+
+	encabezado(titulo);
+	if (!vaciarListaBD()) {
+		cout << "\tHubo un error al intentar eliminar las tareas cumplidas...\n";
+		cargando();
+		return false;
+	}
+
+	cout << "\tLas tareas cumplidas de esta lista han sido eliminadas con exito!\n";
+	cargando();
+	return true;
 }
 
 void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
@@ -926,6 +999,7 @@ void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 		encabezado(titulo);
 		cout << "\tSe encuentra en la lista <" << cuenta.getNombreLista(listaID) << ">\n";
 		cout << "\tEscriba la letra de la opcion que desee\n\n";
+		cout << "\tEstado: No cumplida\n";
 		cout << "\t<" << cuenta.getDescripcionTarea(listaID, tareaID) << ">\n";
 
 		separador();

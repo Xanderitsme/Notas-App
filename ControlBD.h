@@ -320,6 +320,17 @@ bool vaciarListaBD() {
         }
     }
 
+    const string cumplidas = "Cumplidas";
+
+    if (existeCarpeta(cumplidas)) {
+        if (!eliminarCarpeta(cumplidas)) {
+            return false;
+        }
+        if (!crearCarpeta(cumplidas)) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -518,6 +529,65 @@ bool transferirTareaBD(const int& listOrigID, const int& listDestID, const int& 
 
 // Algunas funciones extras para el control de la BD de las listas
 
+bool copiarListaC(vector<string>& descripcionesC, vector<int>& estadosC) {
+    const string cumplidas = "Cumplidas";
+
+    if (!accederCarpeta(cumplidas)) {
+        return false;
+    }
+
+    vector<string> archivos;
+    archivosCont(archivos);
+    estandarizarArchivos(archivos);
+    ordenarVector(archivos);
+    agregarExtensionTXT(archivos);
+
+    string descripcionTemp;
+    bool estadoTemp;
+
+    for (const auto& archivoNom : archivos) {
+        if (!cargarDatosTarea(archivoNom, descripcionTemp, estadoTemp)) {
+            volverCarpetaAnt();
+            return false;
+        }
+        descripcionesC.push_back(descripcionTemp);
+        estadosC.push_back(estadoTemp);
+    }
+
+    volverCarpetaAnt();
+    return true;
+}
+
+bool pegarListaC(const vector<string>& descripcionesC, const vector<int>& estadosC) {
+    const string cumplidas = "Cumplidas";
+
+    if (!existeCarpeta(cumplidas)) {
+        if (!crearCarpeta(cumplidas)) {
+            return false;
+        }
+    } 
+
+    if (!accederCarpeta(cumplidas)) {
+        return false;
+    }
+
+    vector<string> archivos;
+    int indice = 0, tareaCID = archivosCont(archivos);
+
+    for (const auto& descripcionC : descripcionesC) {
+        if (!registrarTareaBD(descripcionC, estadosC[indice], tareaCID)) {
+            volverCarpetaAnt();
+            return false;
+        }
+
+        tareaCID++;
+        indice++;
+    }
+
+    volverCarpetaAnt();
+    return true;
+}
+
 bool copiarLista(const int& listID_origen, const int& listID_destino) {
     if (!accederCarpeta(to_string(listID_origen))) {
         return false;
@@ -530,15 +600,25 @@ bool copiarLista(const int& listID_origen, const int& listID_destino) {
     agregarExtensionTXT(archivos);
 
     vector<string> descripciones;
+    vector<int> estados;
     string descripcionTemp;
     bool estadoTemp;
 
     for (const auto& archivoNom : archivos) {
         if (!cargarDatosTarea(archivoNom, descripcionTemp, estadoTemp)) {
+            volverCarpetaAnt();
             return false;
         }
-
         descripciones.push_back(descripcionTemp);
+        estados.push_back(estadoTemp);
+    }
+
+    vector<string> descripcionesC;
+    vector<int> estadosC;
+
+    if (!copiarListaC(descripcionesC, estadosC)) {
+        volverCarpetaAnt();
+        return false;
     }
 
     volverCarpetaAnt();
@@ -551,14 +631,21 @@ bool copiarLista(const int& listID_origen, const int& listID_destino) {
         archivos.erase(archivos.begin());
     }
 
-    int tareaID = archivosCont(archivos) - 1;
+    int indice = 0, tareaID = archivosCont(archivos) - 1;
 
     for (const auto& descripcion : descripciones) {
-        if (!registrarTareaBD(descripcion, false, tareaID)) {
+        if (!registrarTareaBD(descripcion, estados[indice], tareaID)) {
+            volverCarpetaAnt();
             return false;
         }
 
         tareaID++;
+        indice++;
+    }
+
+    if (!pegarListaC(descripcionesC, estadosC)) {
+        volverCarpetaAnt();
+        return false;
     }
 
     volverCarpetaAnt();
