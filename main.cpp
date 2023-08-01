@@ -78,6 +78,11 @@ int main() {
 		}
 	}
 
+	encabezado("");
+	cout << "\tHasta la proxima!\n";
+	cargando();
+
+	system("cls");
 	return 0;
 }
 
