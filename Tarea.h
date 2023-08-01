@@ -13,6 +13,8 @@ class Tarea {
 		Tarea(const string&);
 		string getDescripcion();
 		void editarDescripcion(const string&);
+		void cambiarEstado();
+		
 };
 
 Tarea::Tarea(const string& descripcion) {
@@ -26,6 +28,10 @@ string Tarea::getDescripcion(){
 
 void Tarea::editarDescripcion(const string& descripcion) {
 	this->descripcion = descripcion;
+}
+
+void Tarea::cambiarEstado() {
+	this->cumplida = !cumplida;
 }
 
 #endif

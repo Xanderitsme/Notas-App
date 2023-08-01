@@ -9,7 +9,7 @@ using namespace std;
 class Lista {
 	private:
 		string nombreLista;
-		vector<Tarea> tareas;
+		vector<Tarea> tareas, tareasC;
 
 	public:
 		Lista(const string&);
@@ -21,7 +21,14 @@ class Lista {
 		void mostrarTareas();
 		int getCantTareas();
 		string getDescripcionTarea(const int&);
+		void mostrarTareasC();
 		void editarTarea(const int&, const string&);
+
+		void crearTareaC(const string&);
+		void eliminarTareasC();
+		int getCantTareasC();
+		string getDescripcionTareaC(const int&);
+		
 };
 
 Lista::Lista(const string& nombreLista) {
@@ -77,6 +84,46 @@ string Lista::getDescripcionTarea(const int& tareaID) {
 
 void Lista::editarTarea(const int& tareaID, const string& descripcion) {
 	tareas[tareaID].editarDescripcion(descripcion);
+}
+
+void Lista::crearTareaC(const string& descripcion) {
+	tareasC.push_back(Tarea(descripcion));
+	tareasC[tareasC.size() - 1].cambiarEstado();
+}
+
+void Lista::mostrarTareasC() {
+	const string fin = "...";
+	const int limiteDescripcion = 70;
+	int indice = 1;
+	string descRecortada;
+
+	for (auto& tareaC : tareasC) {
+		cout << "\t[" << indice << "]: <";
+
+		if (tareaC.getDescripcion().size() > limiteDescripcion) {
+			descRecortada = tareaC.getDescripcion().substr(0, limiteDescripcion - fin.size());
+			cout << descRecortada << fin;
+		} else {
+			cout << tareaC.getDescripcion();
+		}
+
+		cout << ">\n";
+		indice++;
+	}
+}
+
+void Lista::eliminarTareasC() {
+	while (tareasC.size() > 0) {
+		tareasC.erase(tareasC.begin());
+	}
+}
+
+int Lista::getCantTareasC() {
+	return tareasC.size();
+}
+
+string Lista::getDescripcionTareaC(const int& tareaCID) {
+	return tareasC[tareaCID].getDescripcion();
 }
 
 #endif

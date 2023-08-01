@@ -222,10 +222,17 @@ bool cargarDatosLista(const string& carpetaNom, string& nombreLista) {
         return false;
     }
 
-    const string lista = "Lista.txt";
+    const string lista = "Lista.txt", cumplidas = "Cumplidas";
     vector<string> datos;
     cargarVariables(lista, datos, 1);
     nombreLista = datos[0];
+
+    if (!existeCarpeta(cumplidas)) {
+        if (!crearCarpeta(cumplidas)) {
+            volverCarpetaAnt();
+            return false;
+        }
+    }
 
     volverCarpetaAnt();
     return true;
@@ -271,7 +278,7 @@ bool cambiarDatosListaBD(const string& nombreLista, const int& listaID) {
 }
 
 bool registrarListaBD(const string& nombreLista, const int& listaID) {
-    const string lista = "Lista.txt";
+    const string lista = "Lista.txt", cumplidas = "Cumplidas";
 
     if (!registroGeneral(lista, listaID)) {
         return false;
@@ -281,6 +288,11 @@ bool registrarListaBD(const string& nombreLista, const int& listaID) {
         volverCarpetaAnt();
 		return false;
 	}
+
+    if (!crearCarpeta(cumplidas)) {
+        volverCarpetaAnt();
+        return false;
+    }
 
     volverCarpetaAnt();
 	return true;
@@ -313,10 +325,16 @@ bool vaciarListaBD() {
 
 // Control de la BD para las tareas
 
-bool cargarDatosTarea(const string& archivoNom, string& descripcion) {
+bool cargarDatosTarea(const string& archivoNom, string& descripcion, bool& estado) {
     vector<string> datos;
-    cargarVariables(archivoNom, datos, 1);
+    cargarVariables(archivoNom, datos, 2);
     descripcion = datos[0];
+
+    if (datos[1] == "0" || datos[1] == "" || datos[1] == "false") {
+        estado = false;
+    } else {
+        estado = true;
+    }
 
     return true;
 }
@@ -336,6 +354,40 @@ void estandarizarArchivos(vector<string>& archivos) {
 
     recortarExtension(archivos);
 }
+
+bool cambiarDatosTareaBD(const string& descripcion, const bool& estado, const int& tareaID) {
+    const string extension = ".txt";
+
+    restablecerArchivo(to_string(tareaID) + extension);
+
+    if (!guardarVariable(to_string(tareaID) + extension, descripcion)) {
+        return false;
+    }
+    
+    if (!guardarVariable(to_string(tareaID) + extension, to_string(estado))) {
+        return false;
+    }
+
+    return true;
+}
+
+bool registrarTareaBD(const string& descripcion, const bool& estado, const int& tareaID) {
+    const string extension = ".txt";
+
+    if (!crearArchivo(to_string(tareaID) + extension)) {
+        return false;
+    }
+
+    if (!guardarVariable(to_string(tareaID) + extension, descripcion)) {
+        return false;
+    }
+
+    if (!guardarVariable(to_string(tareaID) + extension, to_string(estado))) {
+        return false;
+    }
+    
+    return true;
+}
 // No se esta llevando un control adecuado de los archivos con nombre no numerico
 void actualizarTareas(Cuenta& cuenta, const int& listaID) {
     cuenta.eliminarTareas(listaID);
@@ -351,16 +403,26 @@ void actualizarTareas(Cuenta& cuenta, const int& listaID) {
     ordenarVector(archivos);
     agregarExtensionTXT(archivos);
 
-    const string extension = ".txt";
+    const string extension = ".txt", cumplidas = "Cumplidas";
     string descripcion;
+    bool estado;
     int tareaID;
 
     for (const auto& archivoNom : archivos) {
         tareaID = cuenta.getCantTareas(listaID);
-        if (cargarDatosTarea(archivoNom, descripcion)) {
-            cuenta.crearTarea(listaID, descripcion);
-            if (archivoNom != to_string(tareaID) + extension) {
-                cambiarNombreAC(archivoNom, to_string(tareaID) + extension);
+        if (cargarDatosTarea(archivoNom, descripcion, estado)) {
+            if (!estado) {
+                cuenta.crearTarea(listaID, descripcion);
+                if (archivoNom != to_string(tareaID) + extension) {
+                    cambiarNombreAC(archivoNom, to_string(tareaID) + extension);
+                }
+            } else {
+                accederCarpeta(cumplidas);
+                vector<string> archivosTemp;
+                archivosCont(archivosTemp);
+                registrarTareaBD(descripcion, estado, archivosTemp.size());
+                volverCarpetaAnt();
+                eliminarArchivo(archivoNom);
             }
         } else {
             error();
@@ -368,30 +430,45 @@ void actualizarTareas(Cuenta& cuenta, const int& listaID) {
     }
 }
 
-bool cambiarDatosTareaBD(string& descripcion, const int& tareaID) {
-    const string extension = ".txt";
+void actualizarTareasC(Cuenta& cuenta, const int& listaID) {
+    cuenta.eliminarTareasC(listaID);
 
-    restablecerArchivo(to_string(tareaID) + extension);
+    vector<string> archivos;
+    archivosCont(archivos);
+    estandarizarArchivos(archivos);
 
-    if (!guardarVariable(to_string(tareaID) + extension, descripcion)) {
-        return false;
-    }
-    
-    return true;
-}
-
-bool registrarTareaBD(const string& descripcion, const int& tareaID) {
-    const string extension = ".txt";
-
-    if (!crearArchivo(to_string(tareaID) + extension)) {
-        return false;
+    if (archivos.size() == 0) {
+        return;
     }
 
-    if (!guardarVariable(to_string(tareaID) + extension, descripcion)) {
-        return false;
+    ordenarVector(archivos);
+    agregarExtensionTXT(archivos);
+
+    const string extension = ".txt", cumplidas = "Cumplidas";
+    string descripcion;
+    bool estado;
+    int tareaCID;
+
+    for (const auto& archivoNom : archivos) {
+        tareaCID = cuenta.getCantTareasC(listaID);
+        if (cargarDatosTarea(archivoNom, descripcion, estado)) {
+            if (estado) {
+                cuenta.crearTareaC(listaID, descripcion);
+                if (archivoNom != to_string(tareaCID) + extension) {
+                    cambiarNombreAC(archivoNom, to_string(tareaCID) + extension);
+                }
+            } else {
+                volverCarpetaAnt();
+                vector<string> archivosTemp;
+                archivosCont(archivosTemp);
+                registrarTareaBD(descripcion, estado, archivosTemp.size() - 1);
+                accederCarpeta(cumplidas);
+                eliminarArchivo(archivoNom);
+            }
+        } else {
+            error();
+        }
     }
-    
-    return true;
 }
 
 bool eliminarTareaBD(const int& tareaID) {
@@ -407,8 +484,9 @@ bool eliminarTareaBD(const int& tareaID) {
 bool transferirTareaBD(const int& listOrigID, const int& listDestID, const int& tareaID) {
     const string extension = ".txt";
     string descripcion;
+    bool estado;
 
-    if (!cargarDatosTarea(to_string(tareaID) + extension, descripcion)) {
+    if (!cargarDatosTarea(to_string(tareaID) + extension, descripcion, estado)) {
         return false;
     }
 
@@ -421,7 +499,7 @@ bool transferirTareaBD(const int& listOrigID, const int& listDestID, const int& 
     vector<string> archivos;
     int tareaTransferidaID = archivosCont(archivos) - 1;
 
-    if (!registrarTareaBD(descripcion, tareaTransferidaID)) {
+    if (!registrarTareaBD(descripcion, estado, tareaTransferidaID)) {
         return false;
     }
 
@@ -453,9 +531,10 @@ bool copiarLista(const int& listID_origen, const int& listID_destino) {
 
     vector<string> descripciones;
     string descripcionTemp;
+    bool estadoTemp;
 
     for (const auto& archivoNom : archivos) {
-        if (!cargarDatosTarea(archivoNom, descripcionTemp)) {
+        if (!cargarDatosTarea(archivoNom, descripcionTemp, estadoTemp)) {
             return false;
         }
 
@@ -475,7 +554,7 @@ bool copiarLista(const int& listID_origen, const int& listID_destino) {
     int tareaID = archivosCont(archivos) - 1;
 
     for (const auto& descripcion : descripciones) {
-        if (!registrarTareaBD(descripcion, tareaID)) {
+        if (!registrarTareaBD(descripcion, false, tareaID)) {
             return false;
         }
 

@@ -39,8 +39,10 @@ void renombrarLista(Cuenta&, const int&);
 bool eliminarLista(Cuenta&, const int&);
 void vaciarLista(Cuenta&, const int&);
 
+void interfazListaCumplidas(Cuenta&, const int&);
+
 void interfazTarea(Cuenta&, const int&, const int&);
-// void marcarTarea();
+bool cambiarEstadoTarea(Cuenta&, const int&, const int&, const bool&);
 void editarTarea(Cuenta&, const int&, const int&);
 bool eliminarTarea(Cuenta&, const int&, const int&);
 bool transferirTarea(Cuenta&, const int&, const int&);
@@ -684,7 +686,7 @@ void interfazLista(Cuenta& cuenta, const int& listaID) {
 		return;
 	}
 
-	const string titulo = "Ver lista";
+	const string titulo = "Ver lista", cumplidas = "Cumplidas";
 	string opcion;
 	int tareaID = 0;
 
@@ -704,6 +706,7 @@ void interfazLista(Cuenta& cuenta, const int& listaID) {
 		cout << "\t[S]: Renombrar lista\n";
 		cout << "\t[D]: Eliminar lista\n";
 		cout << "\t[F]: Vaciar lista\n";
+		cout << "\t[G]: Ver tareas cumplidas\n";
 		cout << "\t[X]: Volver\n";
 		cout << "\t-> ";
 		getline(cin, opcion);
@@ -724,6 +727,9 @@ void interfazLista(Cuenta& cuenta, const int& listaID) {
 
 		} else if (opcion == "F" || opcion == "f") {
 			vaciarLista(cuenta, listaID);
+
+		} else if (opcion == "G" || opcion == "g") {
+			interfazListaCumplidas(cuenta, listaID);
 
 		} else if (!salir(opcion)) {
 			opcionInvalida();
@@ -749,7 +755,7 @@ void crearTarea(Cuenta& cuenta, const int& listaID) {
 	}
 
 	encabezado(titulo);
-	if (registrarTareaBD(descripcion, tareaID)) {
+	if (registrarTareaBD(descripcion, false, tareaID)) {
 		cout << "\tLa tarea se ha creado con exito!\n";
 	} else {
 		cout << "\tHa ocurrido un error al intentar crear la tarea\n";
@@ -862,6 +868,55 @@ void vaciarLista(Cuenta& cuenta, const int& listaID) {
 	cargando();
 }
 
+void interfazListaCumplidas(Cuenta& cuenta, const int& listaID) {
+	const string titulo = "Tareas cumplidas", cumplidas = "Cumplidas";
+
+	if (!accederCarpeta(cumplidas)) {
+		cout << "\tHa ocurrido un error al intentar acceder a la lista, por favor vuelva a intentarlo\n";
+		cargando();
+		return;
+	}
+
+	actualizarTareasC(cuenta, listaID);
+	if (cuenta.getCantTareasC(listaID) == 0) {
+		encabezado(titulo);
+		cout << "\tNo tiene ninguna tarea cumplida!\n";
+		cargando();
+		volverCarpetaAnt();
+		return;
+	}
+
+	string opcion;
+	int tareaCID = 0;
+
+	while (opcion != "X" && opcion != "x") {
+		encabezado(titulo);
+		actualizarTareasC(cuenta, listaID);
+		cout << "\tTareas cumplidas en <" << cuenta.getNombreLista(listaID) << ">\n";
+		cout << "\tEscriba el numero de alguna tarea para ver mas opciones, o la letra de cualquiera de las opciones\n\n";
+
+		cuenta.mostrarTareasC(listaID);
+
+		separador();
+		cout << "\t[A]: Vaciar lista\n";
+		cout << "\t[X]: Volver\n";
+		cout << "\t-> ";
+		getline(cin, opcion);
+
+		if (convertirStringInt(opcion, tareaCID) && tareaCID > 0 && tareaCID <= cuenta.getCantTareasC(listaID)) {
+			// interfazTarea(cuenta, listaID, tareaID - 1);
+
+		} else if (opcion == "A" || opcion == "a") {
+			// vaciar lista
+
+		} else if (!salir(opcion)) {
+			opcionInvalida();
+		}
+	}
+
+	volverCarpetaAnt();
+}
+
 void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 	const string titulo = "Mostrando tarea";
 	string opcion;
@@ -883,10 +938,9 @@ void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 		getline(cin, opcion);
 
 		if (opcion == "A" || opcion == "a") {
-			encabezado("Marcar como cumplida");
-			cout << "\tComing soon . . .";
-			getch();
-
+			if (cambiarEstadoTarea(cuenta, listaID, tareaID, false)) {
+				return;
+			}
 		} else if (opcion == "S" || opcion == "s") {
 			editarTarea(cuenta, listaID, tareaID);
 
@@ -905,6 +959,31 @@ void interfazTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 	}
 }
 
+bool cambiarEstadoTarea(Cuenta& cuenta, const int& listaID, const int& tareaID, const bool& estado) {
+	const string titulo = "Cambiar estado tarea";
+	string descripcion;
+
+	if (estado) { // Cuando la tarea actualmente ya ha sido cumplida
+		descripcion = cuenta. getDescripcionTareaC(listaID, tareaID);
+	} else { //Cuando la tarea actualmente no ha sido cumplida
+		descripcion = cuenta.getDescripcionTarea(listaID, tareaID);
+		cuenta.crearTareaC(listaID, descripcion);
+	}
+
+	encabezado(titulo);
+	if (!cambiarDatosTareaBD(descripcion, !estado, tareaID)) {
+		cout << "\tHa ocurrido un error al intentar cambiar el estado de esta tarea\n";
+		cargando();
+		return false;
+	}
+
+	cout << "\t<" << descripcion << ">\n";
+	separador();
+	cout << "\tEl estado de esta tarea ha sido cambiado!\n";
+	cargando();
+	return true;
+}
+
 void editarTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 	const string titulo = "Editar tarea";
 	string descripcion;
@@ -920,7 +999,7 @@ void editarTarea(Cuenta& cuenta, const int& listaID, const int& tareaID) {
 	}
 
 	encabezado(titulo);
-	if (cambiarDatosTareaBD(descripcion, tareaID)) {
+	if (cambiarDatosTareaBD(descripcion, false, tareaID)) {
 		cuenta.editarTarea(listaID, tareaID, descripcion);
 		cout << "\tEl contenido de la tarea ha sido editado con exito!\n";
 	} else {
