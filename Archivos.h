@@ -2,12 +2,13 @@
 #define Archivos_h
 
 #include <iostream>
-#include <vector>
-#include <windows.h>
+#include <filesystem>
 #include <fstream>
+#include <vector>
 #include <string>
 
 using namespace std;
+namespace fs = filesystem;
 
 bool crearArchivo(const string& nombreArchivo) {
     ofstream archivo(nombreArchivo);
@@ -55,21 +56,24 @@ int cantidadVariables(const string& nombreArchivo) {
             numVariables++;
         }
         archivo.close();
-        return numVariables;
     }
-    return 0;
+    return numVariables;
 }
 
 bool eliminarArchivo(const string& nombreArchivo) {
-    if (remove(nombreArchivo.c_str()) == 0) {
-        return true;
+    try {
+        fs::remove(nombreArchivo);
+    } catch (const std::filesystem::filesystem_error& e) {
+        return false;
     }
-    return false;
+    return true;
 }
 
 bool existeArchivo(const string& nombreArchivo) {
-    ifstream archivo(nombreArchivo);
-    return archivo.good();
+    if (fs::exists(nombreArchivo)) {
+        return true;
+    }
+    return false;
 }
 
 #endif

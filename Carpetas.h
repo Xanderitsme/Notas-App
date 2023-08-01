@@ -2,19 +2,8 @@
 #define Carpetas_h
 
 #include <iostream>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <windows.h>
 #include <filesystem>
-
 #include <vector>
-#include <string>
-
-
-#include <direct.h>
-#define mkdir(path, mode) _mkdir(path)
-#define rmdir(path) _rmdir(path)
 
 using namespace std;
 namespace fs = filesystem;
@@ -22,21 +11,25 @@ namespace fs = filesystem;
 // Funciones para manipular carpetas y directorios
 
 bool crearCarpeta(const string& nombre) {
-    if (mkdir(nombre.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0) {
+    if (fs::create_directory(nombre.c_str())) {
         return true;
     }
     return false;
 }
 
-bool accederCarpeta(const string& nombre) {
-    if (chdir(nombre.c_str()) == 0) {
+bool accederCarpeta(const std::string& nombre) {
+    fs::path DirNuevo = fs::absolute(nombre);
+    fs::current_path(DirNuevo);
+    fs::path DirActual = fs::current_path();
+    if (DirNuevo == DirActual) {
         return true;
     }
-    return false;    
+    return false;
 }
 
 void volverCarpetaAnt() {
-    chdir("..");
+    fs::path nuevoDirectorio = fs::current_path();
+    fs::current_path(nuevoDirectorio.parent_path());
 }
 // Modifica los nombres de las carpetas o archivos
 // Primer parametro: Nombre actual
@@ -71,27 +64,7 @@ int archivosCont(vector<string>& archivos) {
 }
 
 bool eliminarCarpeta(const string& nombre) {
-    if (rmdir(nombre.c_str()) == 0) {
-        return true;
-    }
-    if (accederCarpeta(nombre)) {
-        vector<string> archivos;
-        int archivosCant = archivosCont(archivos);
-        for (const auto& archivoNom : archivos) {
-            remove(archivoNom.c_str());
-        }
-
-        vector<string> carpetas;
-        carpetasCont(carpetas);
-        
-        for (const auto& carpetaNom : carpetas) {
-            eliminarCarpeta(carpetaNom);
-        }
-
-        volverCarpetaAnt();
-    }
-
-    if (rmdir(nombre.c_str()) == 0) {
+    if (fs::remove_all(nombre.c_str())) {
         return true;
     }
     return false;
